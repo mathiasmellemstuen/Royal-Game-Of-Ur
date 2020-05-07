@@ -12,6 +12,10 @@ const tileMap = [
     10,0,20
 ];
 
+var piecesOnHand = {
+    from:-1,
+    state:false
+}
 var player1Pieces = [
     24,
     25,
@@ -47,6 +51,7 @@ window.onload = function() {
     
     scaleCanvas();
     window.addEventListener("resize", scaleCanvas); 
+    canvas.addEventListener("click", onClick); 
 }
 
 function getCanvasXSize() {
@@ -153,4 +158,15 @@ function drawStone(index, img) {
     }
     let pos = tileMapIndexToPosition(index); 
     context.drawImage(img, (pos.x * getTileSize()) + getTileSize(), pos.y * getTileSize(), getTileSize(), getTileSize());
+}
+
+function onClick(event) {
+    let rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+
+    let xTile = Math.floor(x / getTileSize()) - 1; // Legger på -1 fordi jeg vil at x: 0 skal være på selve brettet.
+    let yTile = Math.floor(y / getTileSize());
+    
+    console.log("X-tile: " + xTile + "\nY-tile: " + yTile); 
 }
