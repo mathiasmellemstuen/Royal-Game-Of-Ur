@@ -1,0 +1,12 @@
+body {
+    margin:0; 
+    padding:0; 
+    background-color:rgb(77, 77, 77); 
+    display:grid; 
+    grid-template-columns: 33% 33% 33%; 
+}
+canvas {
+    margin:0; 
+    padding:0; 
+    grid-column-start: 2;
+}
