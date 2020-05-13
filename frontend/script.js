@@ -1,13 +1,3 @@
-var canvas; 
-var context; 
-var playerColor = "white"; 
-var drawingInterval; 
-var mousePosition = {
-    x:0,
-    y:0
-}
-const drawingIntervalTime = 20; 
-
 /*
  Index map (for clarity)
 
@@ -20,13 +10,14 @@ const drawingIntervalTime = 20;
     30 18 19 20 37
        21 22 23
 */
+const drawingIntervalTime = 20;
 const tileMap = [
     11,0,21,
     10,0,20,
     10,0,20,
     10,1,20,
     -1,0,-1,
-    -1,0,-1,
+    12,0,22,
     11,0,21,
     10,0,20
 ];
@@ -83,6 +74,15 @@ var pieceOnHand = {
     from:undefined,
     state:false
 }
+var canvas; 
+var context; 
+var playerColor = "white"; 
+var drawingInterval; 
+var mousePosition = {
+    x:0,
+    y:0
+}
+var gameMode = "offline"; //Online or offline
 
 var image_tile = new Image(); 
 var image_flower = new Image(); 
@@ -235,7 +235,7 @@ function onClick(event) {
     if(pieceOnHand.state == false && event.type == "mousedown") {
         pickUpPiece(tileMapPositionToIndex(mouseTile.x,mouseTile.y)); 
     } 
-    else if(event.type == "mouseup") {
+    else if(pieceOnHand.state == true && event.type == "mouseup") {
         putDownPiece(tileMapPositionToIndex(mouseTile.x, mouseTile.y)); 
     }
 }
@@ -280,12 +280,11 @@ function placePieceOffBoard(piece) {
 
     }
 
-    console.error("Didn't find a avaiable space."); 
-
+    console.error("Could not find available space.");
 }
 function putDownPiece(index) {
 
-    if(index < 24) { // Since you can only put pieces down at the board. 
+    if(index < 24) {
         
         let pieceAtIndex = getPieceAtIndex(index); 
 
@@ -301,6 +300,21 @@ function putDownPiece(index) {
         pieceOnHand.state = false; 
         clearInterval(drawingInterval); 
         draw(); // Redrawing
+    } else {
+        placePieceOffBoard(pieceOnHand.piece); 
+        pieceOnHand.piece = undefined; 
+        pieceOnHand.state = false; 
+        clearInterval(drawingInterval); 
+        draw(); // Redrawing
     }
-
 }
+
+function rollDice() {
+    let dice1 = Math.random() * 10;
+    let dice2 = Math.random() * 10; 
+    let dice3 = Math.random() * 10; 
+    let dice4 = Math.random() * 10; 
+
+    return (dice1 > 5 ? 1 : 0) + (dice2 >= 5 ? 1 : 0) + (dice3 > 5 ? 1 : 0) + (dice4 > 5 ? 1 : 0);
+}
+
