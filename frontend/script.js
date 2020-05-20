@@ -76,13 +76,15 @@ var pieceOnHand = {
 }
 var canvas; 
 var context; 
-var playerColor = "white"; 
+var playerColor = "white";
 var drawingInterval; 
 var mousePosition = {
     x:0,
     y:0
 }
-var gameMode = "offline"; //Online or offline
+var gameID = undefined; // ID for online games. 
+var gameMode = undefined; //Online or offline
+var diceValue = undefined; 
 
 var image_tile = new Image(); 
 var image_flower = new Image(); 
@@ -104,8 +106,78 @@ window.onload = function() {
     canvas.addEventListener("mousedown", onClick); 
     canvas.addEventListener("mouseup", onClick); 
     canvas.addEventListener("mousemove", updateRawMousePosition);
+
+    for (let element of document.getElementsByClassName("modal-close-button")) {
+
+        element.addEventListener("click", function() {
+            element.parentElement.parentElement.style.display = "none";
+        });
+    }
+
+    document.getElementById("roll-dice-button-white").addEventListener("click", function() {
+        diceValue = rollDice(); 
+        document.getElementById("roll-dice-text-white").innerHTML = diceValue; 
+        toggleWhiteButton(); 
+    });
+
+    document.getElementById("roll-dice-button-black").addEventListener("click", function() {
+        diceValue = rollDice(); 
+        document.getElementById("roll-dice-text-black").innerHTML = diceValue; 
+        toggleBlackButton(); 
+    });
+
+    document.getElementById("play-button").addEventListener("click", function() {
+        gameMode = document.querySelector('input[name="game-type"]:checked').value;
+        startNewGame(); 
+        document.getElementById("play-button").parentElement.parentElement.style.display = "none";
+    });
 }
 
+
+function startNewGame() {
+    
+    if(gameMode == "offline") {
+        let random = rollDice();
+        playerColor = random > 2 ? "black" : "white"; 
+        preTurnUpdate(); 
+
+    } else if(gameMode == "online") {
+        //Fetch a online game id and start the game. 
+        //Display waiting for player html content. 
+        
+    } else {
+        console.error("GameMode is not specified"); 
+    }
+}
+
+function preTurnUpdate() {
+
+    if(playerColor == "white") {
+        enableWhiteButton(); 
+    } else {
+        enableBlackButton(); 
+    }
+    draw(); 
+}
+
+function postTurnUpdate() {
+
+}
+function offlineChangeTurn()  {
+
+    playerColor = playerColor == "white" ? "black" : "white"; 
+}
+
+function enableWhiteButton() {
+    document.getElementById("white-dice-div").style.display = "block";
+    document.getElementById("black-dice-div").style.display = "none"; 
+
+}
+function enableBlackButton() {
+    document.getElementById("black-dice-div").style.display = "block"; 
+    document.getElementById("white-dice-div").style.display = "none"; 
+
+}
 function updateRawMousePosition(event) {
     let rect = canvas.getBoundingClientRect();
     mousePosition.x = event.clientX - rect.left;
@@ -315,6 +387,5 @@ function rollDice() {
     let dice3 = Math.random() * 10; 
     let dice4 = Math.random() * 10; 
 
-    return (dice1 > 5 ? 1 : 0) + (dice2 >= 5 ? 1 : 0) + (dice3 > 5 ? 1 : 0) + (dice4 > 5 ? 1 : 0);
+    return (dice1 > 5 ? 1 : 0) + (dice2 > 5 ? 1 : 0) + (dice3 > 5 ? 1 : 0) + (dice4 > 5 ? 1 : 0);
 }
-

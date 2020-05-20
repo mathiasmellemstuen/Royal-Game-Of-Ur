@@ -1,9 +1,14 @@
+@font-face {
+    font-family:"Roboto";
+    src: url("Roboto-Bold.ttf") format("truetype");
+}
 body {
     margin:0; 
     padding:0; 
     background-color:rgb(77, 77, 77); 
     display:grid; 
     grid-template-columns: 33% 33% 33%; 
+    font-family: 'Roboto', sans-serif;
 }
 canvas {
     margin:0; 
@@ -12,4 +17,83 @@ canvas {
     position:relative; 
     margin-left: auto;
     margin-right:auto; 
+}
+h1,h2,h3,h4 {
+    text-align: center;
+}
+p,span,h1,h2,h3,h4 {
+    color:white; 
+}
+#left-content {
+    margin:0; 
+    padding:0; 
+    grid-column-start: 1;
+    position:relative; 
+}
+#right-content {
+    margin:0; 
+    padding:0; 
+    grid-column-start: 3;
+    position:relative; 
+}
+
+.default-button-style, input {
+    padding:5px; 
+    margin:5px; 
+    border-radius: 3px;
+    border:none; 
+    color:white;
+    background-color: rgb(37, 92, 61);
+    font-size: 14px;
+    font-weight: bold;
+    padding: 16px 16px; 
+    cursor: pointer;
+    transition:ease-in-out 300ms; 
+}
+.default-button-style:hover {
+    background-color: rgb(66, 156, 105);
+}
+.top-bar {
+    width:100%; 
+}
+.modal-start-hidden {
+    display:none;
+}
+.modal {
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    display: block;
+    position: relative;
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color:#3a3a3a;
+    border-radius: 10px;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.modal-close-button {
+    margin-left:100%;   
+    border:none; 
+    cursor: pointer;
+    background-color:rgba(255, 255, 255, 0);
+    color: white;
+    float: right;
+    font-size: 18px;    
+    font-weight: bold;
+}
+.dice-text {
+    text-align:center;
+    font-size: 32px;
+    margin:0;
 }
