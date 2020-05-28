@@ -36,7 +36,8 @@ const whitePlayerPath = [
     19,
     22,
     21,
-    18
+    18,
+    15
 ];
 const blackPlayerPath = [
     11,
@@ -52,7 +53,8 @@ const blackPlayerPath = [
     19,
     22,
     23,
-    20
+    20,
+    17
 ];
 var pieces = [
     {color:"white", index:24},
@@ -74,6 +76,7 @@ var pieceOnHand = {
     from:undefined,
     state:false
 }
+var currentAvaiablePlacementForPiece = undefined;
 var canvas; 
 var context; 
 var playerColor = "white";
@@ -116,14 +119,12 @@ window.onload = function() {
 
     document.getElementById("roll-dice-button-white").addEventListener("click", function() {
         diceValue = rollDice(); 
-        document.getElementById("roll-dice-text-white").innerHTML = diceValue; 
-        toggleWhiteButton(); 
+        document.getElementById("roll-dice-text-white").innerHTML = diceValue;
     });
 
     document.getElementById("roll-dice-button-black").addEventListener("click", function() {
         diceValue = rollDice(); 
-        document.getElementById("roll-dice-text-black").innerHTML = diceValue; 
-        toggleBlackButton(); 
+        document.getElementById("roll-dice-text-black").innerHTML = diceValue;
     });
 
     document.getElementById("play-button").addEventListener("click", function() {
@@ -132,7 +133,6 @@ window.onload = function() {
         document.getElementById("play-button").parentElement.parentElement.style.display = "none";
     });
 }
-
 
 function startNewGame() {
     
@@ -143,10 +143,19 @@ function startNewGame() {
 
     } else if(gameMode == "online") {
         //Fetch a online game id and start the game. 
-        //Display waiting for player html content. 
-        
+        //Display waiting for player html content.
+
     } else {
-        console.error("GameMode is not specified"); 
+        console.error("GameMode is not correctly specified");
+    }
+}
+function changeTurn() {
+    if(gameMode == "offline") {
+        postTurnUpdate();
+        offlineChangeTurn();
+        preTurnUpdate();
+    } else {
+        //Change turn online.
     }
 }
 
@@ -161,16 +170,19 @@ function preTurnUpdate() {
 }
 
 function postTurnUpdate() {
+    draw();
 
+    //Check if pieces is at the winning square. If that's the case. Update the score and remove the piece. Call draw after that.
 }
 function offlineChangeTurn()  {
 
-    playerColor = playerColor == "white" ? "black" : "white"; 
+    playerColor = playerColor == "white" ? "black" : "white";
 }
 
 function enableWhiteButton() {
     document.getElementById("white-dice-div").style.display = "block";
-    document.getElementById("black-dice-div").style.display = "none"; 
+    document.getElementById("black-dice-div").style.display = "none";
+
 
 }
 function enableBlackButton() {
@@ -217,10 +229,21 @@ function getTileImageBasedOnTileMapNumber(number) {
 function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground(); 
-    drawStones(); 
+    drawStones();
+    drawCurrentPlacementsForPiece();
     drawStoneAtHand(); 
 }
 
+function drawCurrentPlacementsForPiece() {
+
+    if(currentAvaiablePlacementForPiece == undefined) {
+        return;
+    }
+
+    context.strokeStyle = "#FF0000";
+    let pos = tileMapIndexToPosition(currentAvaiablePlacementForPiece);
+    context.strokeRect(getTileSize() + (pos.x * getTileSize()), pos.y * getTileSize(), getTileSize(), getTileSize());
+}
 function drawBackground() {
     for(let i = 0; i < tileMap.length; i++) {
         let pos = tileMapIndexToPosition(i); 
@@ -308,7 +331,13 @@ function onClick(event) {
         pickUpPiece(tileMapPositionToIndex(mouseTile.x,mouseTile.y)); 
     } 
     else if(pieceOnHand.state == true && event.type == "mouseup") {
-        putDownPiece(tileMapPositionToIndex(mouseTile.x, mouseTile.y)); 
+        putDownPiece(tileMapPositionToIndex(mouseTile.x, mouseTile.y));
+
+    }
+
+    if(event.type == "mouseup") {
+        currentAvaiablePlacementForPiece = undefined;
+        draw(); // Drawing the changes to remove the red square.
     }
 }
 
@@ -326,6 +355,8 @@ function pickUpPiece(index) {
             pieceOnHand.piece = pieces[i]; 
             pieceOnHand.state = true; 
             pieces.splice(i,1);
+            let piecePlacementPosition = calculatePiecePlacementPosition(pieceOnHand.piece.index, pieceOnHand.piece.color, diceValue);
+            currentAvaiablePlacementForPiece = piecePlacementPosition;
         }
     }
     drawingInterval = setInterval(draw, drawingIntervalTime);
@@ -349,38 +380,120 @@ function placePieceOffBoard(piece) {
             pieces.push(piece);
             return; 
         }
-
     }
-
+    
     console.error("Could not find available space.");
 }
 function putDownPiece(index) {
 
-    if(index < 24) {
-        
-        let pieceAtIndex = getPieceAtIndex(index); 
+    if(index == currentAvaiablePlacementForPiece) {
+        let pieceAtIndex = getPieceAtIndex(index);
 
-        if(pieceAtIndex != undefined && pieceAtIndex.color == playerColor) { // Putting the piece back. 
-            placePieceOffBoard(pieceOnHand.piece); 
-            return; 
-        } else if(pieceAtIndex != undefined && pieceAtIndex.color != playerColor) {
-            placePieceOffBoard(pieceAtIndex); 
+        if(pieceAtIndex == undefined) { // Valid.
+
+            pieceOnHand.piece.index = index;
+            pieces.push(pieceOnHand.piece);
+            pieceOnHand.piece = undefined;
+            pieceOnHand.state = false;
+            clearInterval(drawingInterval);
+            draw(); // Redrawing
+            changeTurn();
+
+        } else if(pieceAtIndex.color == pieceOnHand.piece.color) { // Not valid.
+
+            pieces.push(pieceOnHand.piece);
+            pieceOnHand.piece = undefined;
+            pieceOnHand.state = false;
+            clearInterval(drawingInterval);
+            draw(); // Redrawing
+
+        } else if(pieceAtIndex.color != pieceOnHand.piece.color) { // Valid
+            placePieceOffBoard(pieceAtIndex);
+            pieceOnHand.piece.index = index;
+            pieces.push(pieceOnHand.piece);
+            pieceOnHand.piece = undefined;
+            pieceOnHand.state = false;
+            clearInterval(drawingInterval);
+            draw(); // Redrawing
+            changeTurn();
         }
-        pieceOnHand.piece.index = index; 
-        pieces.push(pieceOnHand.piece); 
-        pieceOnHand.piece = undefined; 
-        pieceOnHand.state = false; 
-        clearInterval(drawingInterval); 
+    } else { // Not valid.
+        pieces.push(pieceOnHand.piece);
+        pieceOnHand.piece = undefined;
+        pieceOnHand.state = false;
+        clearInterval(drawingInterval);
         draw(); // Redrawing
-    } else {
-        placePieceOffBoard(pieceOnHand.piece); 
-        pieceOnHand.piece = undefined; 
-        pieceOnHand.state = false; 
-        clearInterval(drawingInterval); 
-        draw(); // Redrawing
+
     }
 }
+function calculateAllPossiblePiecePlacements() {
 
+    let moves = [];
+    // This is how a move looks like: {from:0,to:1}
+
+    for(let i = 0; i < pieces.length; i++)  {
+
+        let piece = pieces[i];
+
+        if(piece.color != playerColor)
+            continue;
+
+        let pathValue = playerColor == "white" ? whitePlayerPath[playerPathPositionToPlayerPathIndex(piece.index) + diceValue] : blackPlayerPath[playerPathPositionToPlayerPathIndex(piece.index) + diceValue];
+
+        if(pathValue == undefined)
+            continue;
+
+        let pieceAtIndex = getPieceAtIndex(pathValue);
+
+        if(pieceAtIndex == undefined || pieceAtIndex.color != playerColor) {
+            moves.push({from:piece.index,to:pathValue});
+            continue;
+        }
+
+        if(pieceAtIndex.color == playerColor)
+            continue;
+    }
+
+    return moves;
+}
+function playerPathPositionToPlayerPathIndex(position) {
+
+    if(position >= 24)
+        return 0; // Is this a bug?
+
+    for(let i = 0; i < whitePlayerPath.length; i++)
+        if(whitePlayerPath[i] == position)
+            return i;
+
+    for(let i = 0; i < blackPlayerPath.length; i++)
+        if(blackPlayerPath[i] == position)
+            return i;
+
+
+    return undefined;
+}
+function calculatePiecePlacementPosition(piecePosition, pieceColor, randomNumber) {
+    if(pieceColor == "white") {
+        if(piecePosition >= 24) {
+            return whitePlayerPath[randomNumber - 1];
+        } else {
+            for(let i = 0; i < whitePlayerPath.length; i++)
+                if(whitePlayerPath[i] == piecePosition)
+                    return ((i + randomNumber) > whitePlayerPath.length - 1) ? undefined : whitePlayerPath[i + randomNumber];
+        }
+    } else {
+        if (piecePosition >= 24) {
+            return blackPlayerPath[randomNumber - 1];
+        } else {
+            for (let i = 0; i < blackPlayerPath.length; i++)
+                if (blackPlayerPath[i] == piecePosition)
+                    return ((i + randomNumber) > blackPlayerPath.length - 1) ? undefined : blackPlayerPath[i + randomNumber];
+        }
+    }
+
+    console.error("Did not find a suitable path for the values.");
+    return undefined;
+}
 function rollDice() {
     let dice1 = Math.random() * 10;
     let dice2 = Math.random() * 10; 
