@@ -11,6 +11,7 @@
        21 22 23
 */
 const drawingIntervalTime = 20;
+const maxDiceValue = 4;
 const tileMap = [
     11,0,21,
     10,0,20,
@@ -236,9 +237,8 @@ function draw() {
 
 function drawCurrentPlacementsForPiece() {
 
-    if(currentAvaiablePlacementForPiece == undefined) {
+    if(currentAvaiablePlacementForPiece == undefined)
         return;
-    }
 
     context.strokeStyle = "#FF0000";
     let pos = tileMapIndexToPosition(currentAvaiablePlacementForPiece);
@@ -254,7 +254,7 @@ function drawBackground() {
 }
 function drawStoneAtHand() {
     if(pieceOnHand.state == true)
-        context.drawImage(pieceOnHand.piece.color == "white" ? image_white_stone : image_black_stone, mousePosition.x, mousePosition.y, getTileSize(), getTileSize());
+        context.drawImage(pieceOnHand.piece.color == "white" ? image_white_stone : image_black_stone, mousePosition.x - (getTileSize() / 2), mousePosition.y - (getTileSize() / 2), getTileSize(), getTileSize());
 
 }
 function drawStones() {
@@ -352,11 +352,19 @@ function getPieceAtIndex(index) {
 function pickUpPiece(index) {
     for(let i = 0; i < pieces.length; i++) {
         if(pieces[i].index == index && pieces[i].color == playerColor) {
-            pieceOnHand.piece = pieces[i]; 
+
+            let placementPositions = calculateAllPossiblePiecePlacements();
+            pieceOnHand.piece = pieces[i];
             pieceOnHand.state = true; 
             pieces.splice(i,1);
-            let piecePlacementPosition = calculatePiecePlacementPosition(pieceOnHand.piece.index, pieceOnHand.piece.color, diceValue);
-            currentAvaiablePlacementForPiece = piecePlacementPosition;
+
+            for(let i = 0; i < placementPositions.length; i++) {
+
+                currentAvaiablePlacementForPiece = placementPositions[i].from == pieceOnHand.piece.index ? placementPositions[i].to : undefined;
+
+                if(currentAvaiablePlacementForPiece != undefined)
+                    break;
+            }
         }
     }
     drawingInterval = setInterval(draw, drawingIntervalTime);
@@ -387,9 +395,43 @@ function placePieceOffBoard(piece) {
 function putDownPiece(index) {
 
     if(index == currentAvaiablePlacementForPiece) {
+
+        //Checking if a player is placing the piece on a winning square.
+        if(index == 15 && pieceOnHand.piece.color == "white") {
+
+            console.log("Update the white player score here. ");
+            pieceOnHand.piece = undefined;
+            pieceOnHand.state = false;
+            clearInterval(drawingInterval);
+            draw();
+            changeTurn();
+            return;
+        } else if(index == 17 && pieceOnHand.piece.color == "black") {
+
+            console.log("Update the black player score here.");
+            pieceOnHand.piece = undefined;
+            pieceOnHand.state = false;
+            clearInterval(drawingInterval);
+            draw();
+            changeTurn();
+            return;
+        }
+
         let pieceAtIndex = getPieceAtIndex(index);
 
-        if(pieceAtIndex == undefined) { // Valid.
+         if((index == 10 || index == 0 || index == 2 || index == 18 || index == 20) && pieceAtIndex == undefined) { // This is all special squares, give extra turn.
+
+            pieceOnHand.piece.index = index;
+            pieces.push(pieceOnHand.piece);
+            pieceOnHand.piece = undefined;
+            pieceOnHand.state = false;
+            clearInterval(drawingInterval);
+            draw(); // Redrawing
+            console.log("Piece is placed on a special square. Give a extra turn here!")
+            return;
+        }
+
+        if(pieceAtIndex == undefined) { // Valid. Placing the piece at the position.
 
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
@@ -399,7 +441,7 @@ function putDownPiece(index) {
             draw(); // Redrawing
             changeTurn();
 
-        } else if(pieceAtIndex.color == pieceOnHand.piece.color) { // Not valid.
+        } else if(pieceAtIndex.color == pieceOnHand.piece.color) { // Not valid, putting the piece back where it was.
 
             pieces.push(pieceOnHand.piece);
             pieceOnHand.piece = undefined;
@@ -407,7 +449,7 @@ function putDownPiece(index) {
             clearInterval(drawingInterval);
             draw(); // Redrawing
 
-        } else if(pieceAtIndex.color != pieceOnHand.piece.color) { // Valid
+        } else if(pieceAtIndex.color != pieceOnHand.piece.color) { // Valid. Placing the piece at the position and placing the opponents piece off the board.
             placePieceOffBoard(pieceAtIndex);
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
@@ -417,7 +459,7 @@ function putDownPiece(index) {
             draw(); // Redrawing
             changeTurn();
         }
-    } else { // Not valid.
+    } else { // Not valid. Placing the piece back where it was.
         pieces.push(pieceOnHand.piece);
         pieceOnHand.piece = undefined;
         pieceOnHand.state = false;
@@ -429,7 +471,6 @@ function putDownPiece(index) {
 function calculateAllPossiblePiecePlacements() {
 
     let moves = [];
-    // This is how a move looks like: {from:0,to:1}
 
     for(let i = 0; i < pieces.length; i++)  {
 
@@ -445,6 +486,9 @@ function calculateAllPossiblePiecePlacements() {
 
         let pieceAtIndex = getPieceAtIndex(pathValue);
 
+        if(pathValue == 10 && pieceAtIndex != undefined)
+            continue;
+
         if(pieceAtIndex == undefined || pieceAtIndex.color != playerColor) {
             moves.push({from:piece.index,to:pathValue});
             continue;
@@ -459,7 +503,7 @@ function calculateAllPossiblePiecePlacements() {
 function playerPathPositionToPlayerPathIndex(position) {
 
     if(position >= 24)
-        return 0; // Is this a bug?
+        return - 1; // 0 is a bug.
 
     for(let i = 0; i < whitePlayerPath.length; i++)
         if(whitePlayerPath[i] == position)
@@ -495,10 +539,5 @@ function calculatePiecePlacementPosition(piecePosition, pieceColor, randomNumber
     return undefined;
 }
 function rollDice() {
-    let dice1 = Math.random() * 10;
-    let dice2 = Math.random() * 10; 
-    let dice3 = Math.random() * 10; 
-    let dice4 = Math.random() * 10; 
-
-    return (dice1 > 5 ? 1 : 0) + (dice2 > 5 ? 1 : 0) + (dice3 > 5 ? 1 : 0) + (dice4 > 5 ? 1 : 0);
+    return Math.round(Math.random() * maxDiceValue); // Random number 0 - 4.
 }
