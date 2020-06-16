@@ -482,7 +482,7 @@ function putDownPiece(index) {
             drawingInterval = undefined;
             draw(); // Redrawing
             showOverlayText("Bonus turn!");
-            diceValue = 0; 
+            diceValue = 0;
             if(playerColor == "white") {
                 toggleWhiteDiv();
             } else {
