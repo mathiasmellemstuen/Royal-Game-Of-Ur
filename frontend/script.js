@@ -88,12 +88,17 @@ var mousePosition = {
 }
 var gameID = undefined; // ID for online games. 
 var gameMode = undefined; //Online or offline
-var diceValue = undefined; 
+var diceValue = undefined;
+
+var overlayText = "";
+var overlayAlpha = 0.0;
+var overlayFadeFactor = 0.01;
 
 var image_tile = new Image(); 
 var image_flower = new Image(); 
 var image_white_stone = new Image(); 
 var image_black_stone = new Image(); 
+
 
 image_tile.src="/graphics/Tile.png";
 image_flower.src="/graphics/Flower_Tile.png";
@@ -104,12 +109,13 @@ window.onload = function() {
 
     canvas = document.getElementById("canvas"); 
     context = canvas.getContext("2d"); 
+    context.font = "Roboto";
 
     scaleCanvas();
     window.addEventListener("resize", scaleCanvas); 
     canvas.addEventListener("mousedown", onClick); 
     canvas.addEventListener("mouseup", onClick); 
-    canvas.addEventListener("mousemove", updateRawMousePosition);
+    canvas.addEventListener("mousemove", onMouseMove);
 
     for (let element of document.getElementsByClassName("modal-close-button")) {
 
@@ -118,21 +124,44 @@ window.onload = function() {
         });
     }
 
-    document.getElementById("roll-dice-button-white").addEventListener("click", function() {
-        diceValue = rollDice(); 
-        document.getElementById("roll-dice-text-white").innerHTML = diceValue;
-    });
-
-    document.getElementById("roll-dice-button-black").addEventListener("click", function() {
-        diceValue = rollDice(); 
-        document.getElementById("roll-dice-text-black").innerHTML = diceValue;
-    });
+    document.getElementById("roll-dice-button-white").addEventListener("click", diceButtonWhiteClick);
+    document.getElementById("roll-dice-button-black").addEventListener("click", diceButtonBlackClick);
 
     document.getElementById("play-button").addEventListener("click", function() {
         gameMode = document.querySelector('input[name="game-type"]:checked').value;
         startNewGame(); 
         document.getElementById("play-button").parentElement.parentElement.style.display = "none";
     });
+
+    document.getElementById("white-dice-div").style.display = "block";
+    document.getElementById("black-dice-div").style.display = "none";
+}
+
+function diceButtonWhiteClick() {
+    diceValue = rollDice();
+    document.getElementById("roll-dice-button-white").style.display = "none";
+    document.getElementById("roll-dice-text-white").style.display = "block";
+    document.getElementById("roll-dice-text-white").innerHTML = diceValue;
+}
+
+function diceButtonBlackClick() {
+    diceValue = rollDice();
+    document.getElementById("roll-dice-button-black").style.display = "none";
+    document.getElementById("roll-dice-text-black").style.display = "block";
+    document.getElementById("roll-dice-text-black").innerHTML = diceValue;
+}
+function toggleWhiteDiv() {
+    document.getElementById("white-dice-div").style.display = "block";
+    document.getElementById("black-dice-div").style.display = "none";
+    document.getElementById("roll-dice-button-white").style.display = "block";
+    document.getElementById("roll-dice-text-white").style.display = "none";
+
+}
+function toggleBlackDiv() {
+    document.getElementById("black-dice-div").style.display = "block";
+    document.getElementById("white-dice-div").style.display = "none";
+    document.getElementById("roll-dice-button-black").style.display = "block";
+    document.getElementById("roll-dice-text-black").style.display = "none";
 }
 
 function startNewGame() {
@@ -140,8 +169,12 @@ function startNewGame() {
     if(gameMode == "offline") {
         let random = rollDice();
         playerColor = random > 2 ? "black" : "white"; 
-        preTurnUpdate(); 
 
+        if(playerColor == "white") {
+            toggleWhiteDiv();
+        } else {
+            toggleBlackDiv();
+        }
     } else if(gameMode == "online") {
         //Fetch a online game id and start the game. 
         //Display waiting for player html content.
@@ -152,49 +185,37 @@ function startNewGame() {
 }
 function changeTurn() {
     if(gameMode == "offline") {
-        postTurnUpdate();
         offlineChangeTurn();
-        preTurnUpdate();
     } else {
         //Change turn online.
     }
 }
-
-function preTurnUpdate() {
-
-    if(playerColor == "white") {
-        enableWhiteButton(); 
-    } else {
-        enableBlackButton(); 
-    }
-    draw(); 
-}
-
-function postTurnUpdate() {
-    draw();
-
-    //Check if pieces is at the winning square. If that's the case. Update the score and remove the piece. Call draw after that.
-}
 function offlineChangeTurn()  {
 
     playerColor = playerColor == "white" ? "black" : "white";
+
+    if(playerColor == "white") {
+        toggleWhiteDiv();
+    } else {
+        toggleBlackDiv();
+    }
+
+    draw();
 }
 
-function enableWhiteButton() {
-    document.getElementById("white-dice-div").style.display = "block";
-    document.getElementById("black-dice-div").style.display = "none";
 
-
-}
-function enableBlackButton() {
-    document.getElementById("black-dice-div").style.display = "block"; 
-    document.getElementById("white-dice-div").style.display = "none"; 
-
-}
 function updateRawMousePosition(event) {
     let rect = canvas.getBoundingClientRect();
     mousePosition.x = event.clientX - rect.left;
     mousePosition.y = event.clientY - rect.top;
+
+
+}
+function onMouseMove(event) {
+    updateRawMousePosition(event);
+
+    if(drawingInterval == undefined)
+        drawingInterval = setInterval(draw, drawingIntervalTime);
 }
 function getCanvasXSize() {
     return window.innerWidth / 3.5; 
@@ -232,9 +253,27 @@ function draw() {
     drawBackground(); 
     drawStones();
     drawCurrentPlacementsForPiece();
-    drawStoneAtHand(); 
+    drawStoneAtHand();
+    drawOverlayText();
 }
 
+function showOverlayText(text) {
+    overlayText = text;
+    overlayAlpha = 1.0;
+}
+function drawOverlayText() {
+
+    context.font = "30px Arial";
+    let textWidth = context.measureText(overlayText).width;
+    let textHeight = context.measureText("M").width;
+    context.fillStyle = "rgba(37, 92, 61, " + overlayAlpha + ")";
+    context.fillRect((canvas.width / 2) - (textWidth / 2) - 15,textHeight - 15, textWidth + 30,textHeight + 30);
+    context.fillStyle = "rgba(0, 0, 0, " + overlayAlpha + ")";
+    context.fillRect((canvas.width / 2) - (textWidth / 2) - 10,textHeight - 10, textWidth + 20,textHeight + 20);
+    context.fillStyle = "rgba(255, 255, 255, " + overlayAlpha + ")";
+    context.fillText(overlayText, (canvas.width / 2) - (textWidth / 2), 50);
+    overlayAlpha = overlayAlpha - overlayFadeFactor;
+}
 function drawCurrentPlacementsForPiece() {
 
     if(currentAvaiablePlacementForPiece == undefined)
@@ -367,7 +406,8 @@ function pickUpPiece(index) {
             }
         }
     }
-    drawingInterval = setInterval(draw, drawingIntervalTime);
+    draw();
+    //drawingInterval = setInterval(draw, drawingIntervalTime);
 }
 function placePieceOffBoard(piece) {
 
@@ -392,6 +432,11 @@ function placePieceOffBoard(piece) {
     
     console.error("Could not find available space.");
 }
+function checkForWinCondition(color) {
+    for(let i = 0; i < pieces.length; i++)
+        if(pieces[i].color == color) return false;
+    return true;
+}
 function putDownPiece(index) {
 
     if(index == currentAvaiablePlacementForPiece) {
@@ -399,19 +444,25 @@ function putDownPiece(index) {
         //Checking if a player is placing the piece on a winning square.
         if(index == 15 && pieceOnHand.piece.color == "white") {
 
-            console.log("Update the white player score here. ");
+            if(checkForWinCondition("white"))
+                showOverlayText("Player white won!");
+
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
             clearInterval(drawingInterval);
+            drawingInterval = undefined;
             draw();
             changeTurn();
             return;
         } else if(index == 17 && pieceOnHand.piece.color == "black") {
 
-            console.log("Update the black player score here.");
+            if(checkForWinCondition("black"))
+                showOverlayText("Player black won!");
+
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
             clearInterval(drawingInterval);
+            drawingInterval = undefined;
             draw();
             changeTurn();
             return;
@@ -426,8 +477,15 @@ function putDownPiece(index) {
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
             clearInterval(drawingInterval);
+            drawingInterval = undefined;
             draw(); // Redrawing
-            console.log("Piece is placed on a special square. Give a extra turn here!")
+            showOverlayText("Bonus turn!");
+
+            if(playerColor == "white") {
+                toggleWhiteDiv();
+            } else {
+                toggleBlackDiv();
+            }
             return;
         }
 
@@ -438,6 +496,7 @@ function putDownPiece(index) {
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
             clearInterval(drawingInterval);
+            drawingInterval = undefined;
             draw(); // Redrawing
             changeTurn();
 
@@ -447,6 +506,7 @@ function putDownPiece(index) {
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
             clearInterval(drawingInterval);
+            drawingInterval = undefined;
             draw(); // Redrawing
 
         } else if(pieceAtIndex.color != pieceOnHand.piece.color) { // Valid. Placing the piece at the position and placing the opponents piece off the board.
@@ -456,6 +516,7 @@ function putDownPiece(index) {
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
             clearInterval(drawingInterval);
+            drawingInterval = undefined;
             draw(); // Redrawing
             changeTurn();
         }
@@ -464,6 +525,7 @@ function putDownPiece(index) {
         pieceOnHand.piece = undefined;
         pieceOnHand.state = false;
         clearInterval(drawingInterval);
+        drawingInterval = undefined;
         draw(); // Redrawing
 
     }
@@ -539,5 +601,13 @@ function calculatePiecePlacementPosition(piecePosition, pieceColor, randomNumber
     return undefined;
 }
 function rollDice() {
-    return Math.round(Math.random() * maxDiceValue); // Random number 0 - 4.
+
+    let value = Math.round(Math.random() * maxDiceValue); // Random number 0 - 4.
+
+    if(value == 0) {
+        showOverlayText("Dice is 0. Changing turn.");
+        changeTurn();
+    }
+    return value;
+
 }
