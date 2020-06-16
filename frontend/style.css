@@ -21,7 +21,7 @@ canvas {
 h1,h2,h3,h4 {
     text-align: center;
 }
-p,span,h1,h2,h3,h4 {
+p,span,h1,h2,h3,h4,label {
     color:white; 
 }
 #left-content {
@@ -96,4 +96,44 @@ p,span,h1,h2,h3,h4 {
     text-align:center;
     font-size: 32px;
     margin:0;
+}
+.radio-container {
+    display:inline-block;
+    position:relative;
+    cursor:pointer;
+    user-select: none;
+    padding-left: 30px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.radio-container input {
+    display:none;
+}
+.radio-container .radio-circle {
+    display:inline-block;
+    width:25px;
+    height:25px;
+    background-color:#eee;
+    position: absolute;
+    left:0;
+    top:0;
+    border-radius: 50%;
+}
+.radio-container:hover .radio-circle {
+    background-color:#ccc;
+}
+.radio-container input:checked + .radio-circle {
+    background-color:rgb(37, 92, 61);
+}
+
+.radio-container input:checked + .radio-circle:after {
+    content:"";
+    height: 10px;
+    width: 10px;
+    background-color:white;
+    position: absolute;
+    border-radius: 50%;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
 }
