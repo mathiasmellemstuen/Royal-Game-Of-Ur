@@ -184,6 +184,7 @@ function startNewGame() {
     }
 }
 function changeTurn() {
+
     if(gameMode == "offline") {
         offlineChangeTurn();
     } else {
@@ -192,6 +193,7 @@ function changeTurn() {
 }
 function offlineChangeTurn()  {
 
+    diceValue = 0;
     playerColor = playerColor == "white" ? "black" : "white";
 
     if(playerColor == "white") {
@@ -480,7 +482,7 @@ function putDownPiece(index) {
             drawingInterval = undefined;
             draw(); // Redrawing
             showOverlayText("Bonus turn!");
-
+            diceValue = 0; 
             if(playerColor == "white") {
                 toggleWhiteDiv();
             } else {
