@@ -89,16 +89,23 @@ public class Game {
             board.getPieceAtIndex(moveRequest.from).setIndex(moveRequest.to);
         }
 
+
+        //TODO: Checking for win condition.
+
+        //Changing turn.
         rollDice();
         specialCaseMessage = "";
         changeTurn();
 
+
+        //Edge case scenario where the dice roll is 0.
         while(diceValue == 0) {
             rollDice();
             specialCaseMessage = "Dice is 0. Changing turn.";
             changeTurn();
         }
 
+        //Edge case scenario where the player have no moves.
         while(!board.haveMoves(playerTurn,diceValue)) {
             rollDice();
             specialCaseMessage = "No moves. Changing turn.";
