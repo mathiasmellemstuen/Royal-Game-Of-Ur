@@ -99,6 +99,12 @@ public class Game {
             changeTurn();
         }
 
+        while(!board.haveMoves(playerTurn,diceValue)) {
+            rollDice();
+            specialCaseMessage = "No moves. Changing turn.";
+            changeTurn();
+        }
+
         context.json("{'STATUS':'VALID'}");
     }
 

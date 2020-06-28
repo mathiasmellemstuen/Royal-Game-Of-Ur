@@ -106,10 +106,19 @@ public class Board {
     }
 
     @JsonIgnore
-    public boolean haveMoves(int moveCount) {
+    public boolean haveMoves(Color playerColor, int moveCount) {
+
+        int[] path = playerColor == Color.WHITE ? whitePath : blackPath;
 
         for(Piece p: pieces) {
-            
+
+            if(p.getColor() != playerColor)
+                continue;
+
+            int index = p.getIndex() >= 24 ? path[moveCount - 1] : path[p.getIndex() + moveCount];
+
+            if(checkIfMoveIsValid(p,index,moveCount))
+                return true;
         }
         return false;
     }
