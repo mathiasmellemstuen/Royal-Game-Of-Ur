@@ -2,5 +2,7 @@ package no.mellemstuen.mathias.theroyalgameofur;
 
 public enum GameState {
     LOBBY,
-    INGAME
+    INGAME,
+    WHITE_VICTORY,
+    BLACK_VICTORY
 }

@@ -49,6 +49,9 @@ public class Game {
     @JsonIgnore
     public void makeMove(Context context) {
 
+        if(gameState != GameState.INGAME)
+            return;
+
         String uid = Controller.getUID(context);
 
         if(!(uid == idPair.getBlackPlayerId() && playerTurn == Color.BLACK) || !(uid == idPair.getWhitePlayerId() && playerTurn == Color.WHITE)) {
@@ -89,8 +92,12 @@ public class Game {
             board.getPieceAtIndex(moveRequest.from).setIndex(moveRequest.to);
         }
 
+        if(board.checkForWinCondition(playerTurn)) {
 
-        //TODO: Checking for win condition.
+            gameState = playerTurn == Color.WHITE ? GameState.WHITE_VICTORY : GameState.BLACK_VICTORY;
+            context.json("{'status':'VALID AND VICTORY'");
+            return;
+        }
 
         //Changing turn.
         rollDice();
