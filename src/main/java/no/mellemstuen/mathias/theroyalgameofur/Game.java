@@ -6,11 +6,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.javalin.http.Context;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Game {
 
     @JsonIgnore
     private final IdPair idPair;
+
+    @JsonIgnore
+    private final LocalDateTime startTime = LocalDateTime.now();
 
     @JsonProperty("gamestate")
     private GameState gameState;
@@ -143,6 +148,10 @@ public class Game {
             e.printStackTrace();
             return "INTERNAL SERVER ERROR";
         }
+    }
+    @JsonIgnore
+    public boolean checkIfGameHasExpired() {
+        return startTime.isAfter(LocalDateTime.now().minusHours(Controller.gameDeletionSchedulePeriodHours));
     }
 
     public Game(IdPair idPair) {

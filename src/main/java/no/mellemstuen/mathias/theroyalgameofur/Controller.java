@@ -3,9 +3,12 @@ package no.mellemstuen.mathias.theroyalgameofur;
 import io.javalin.http.Context;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Controller {
-
+    public static final int gameDeletionSchedulePeriodHours = 1; // Checking every game to see if they need to be deleted every hour. This deletes inactive games.
     private static ArrayList<Game> games = new ArrayList<>();
 
     public static String getUID(Context context) {
@@ -70,5 +73,18 @@ public class Controller {
 
     public static void getNumberOfGames(Context context) {
         context.json("{number_of_games:" + games.size() + "}");
+    }
+
+    public static void startGameDeletionSchedule() { // Checking to see if a game needs to be deleted. This is for removing inactive games so they don't stay in memory forever.
+        ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
+        ses.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                for(Game game : games) {
+                    if(game.checkIfGameHasExpired())
+                        games.remove(game);
+                }
+            }
+        }, 0, 1, TimeUnit.HOURS);
     }
 }
