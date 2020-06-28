@@ -73,15 +73,46 @@ public class Board {
     }
 
     @JsonIgnore
-    public boolean checkIfMoveIsValid(Piece piece, int moveCount) {
+    public boolean checkIfMoveIsValid(Piece piece,int to, int moveCount) {
 
-        for (int index : piece.getColor() == Color.WHITE ? whitePath : blackPath)
-            if(piece.getIndex() + moveCount == index && (getPieceAtIndex(index) == null || getPieceAtIndex(index).getColor() != piece.getColor()))
+        if(piece == null)
+            return false;
+
+        int[] path = piece.getColor() == Color.WHITE ? whitePath : blackPath;
+        int index;
+
+        if(piece.getIndex() >= 24) {
+
+            index = path[moveCount - 1];
+
+            if(to != index)
+                return false;
+
+            if(getPieceAtIndex(to) == null) // Don't need to check for more conditions because you can't meet your opponent when your position is >= 24.
                 return true;
 
+        } else {
+
+            index = path[piece.getIndex() + moveCount];
+
+            if(to != index)
+                return false;
+
+            if(getPieceAtIndex(to) == null || (getPieceAtIndex(to).getColor() != piece.getColor() && to != 10))
+                return true;
+
+        }
         return false;
     }
 
+    @JsonIgnore
+    public boolean haveMoves(int moveCount) {
+
+        for(Piece p: pieces) {
+            
+        }
+        return false;
+    }
     @JsonIgnore
     public Piece getPieceAtIndex(int index) {
         for(Piece piece : pieces)
@@ -91,9 +122,18 @@ public class Board {
     }
 
     @JsonIgnore
-    public void putPieceBackAtStartPosition(Color pieceColor, Piece piece) {
+    public void removePieceAtIndex(int index) {
+        for(Piece piece : pieces)
+            if(piece.getIndex() == index) {
+                pieces.remove(piece);
+                return;
+            }
+    }
 
-        int startingIndex = pieceColor == Color.WHITE ? 24 : 31;
+    @JsonIgnore
+    public void putPieceBackAtStartPosition(Piece piece) {
+
+        int startingIndex = piece.getColor() == Color.WHITE ? 24 : 31;
 
         for(int i = startingIndex; i < startingIndex + 6; i++) {
 
