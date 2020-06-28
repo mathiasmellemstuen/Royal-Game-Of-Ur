@@ -11,6 +11,10 @@ public class Application {
         app.config.addStaticFiles("frontend", Location.EXTERNAL);
 
 
+        app.get("/newgame", Controller::newGame);
+        app.get("/numberofgames", Controller::getNumberOfGames);
+        app.get("/gameupdate", Controller::gameUpdate);
+       // app.get("/game", Controller::)
         app.post("/move", Controller::postMove);
 
         

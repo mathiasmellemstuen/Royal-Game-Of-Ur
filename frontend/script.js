@@ -10,6 +10,7 @@
     30 18 19 20 37
        21 22 23
 */
+const openGameTypeScreenDelay = 3000;
 const drawingIntervalTime = 20;
 const maxDiceValue = 4;
 const tileMap = [
@@ -99,6 +100,7 @@ var image_flower = new Image();
 var image_white_stone = new Image(); 
 var image_black_stone = new Image(); 
 
+var gameFinished = false;
 
 image_tile.src="/graphics/Tile.png";
 image_flower.src="/graphics/Flower_Tile.png";
@@ -138,19 +140,20 @@ window.onload = function() {
 }
 
 function diceButtonWhiteClick() {
-    diceValue = rollDice();
+    rollDice();
     document.getElementById("roll-dice-button-white").style.display = "none";
     document.getElementById("roll-dice-text-white").style.display = "block";
     document.getElementById("roll-dice-text-white").innerHTML = diceValue;
 }
 
 function diceButtonBlackClick() {
-    diceValue = rollDice();
+    rollDice();
     document.getElementById("roll-dice-button-black").style.display = "none";
     document.getElementById("roll-dice-text-black").style.display = "block";
     document.getElementById("roll-dice-text-black").innerHTML = diceValue;
 }
 function toggleWhiteDiv() {
+    console.log("Toggling white div.");
     document.getElementById("white-dice-div").style.display = "block";
     document.getElementById("black-dice-div").style.display = "none";
     document.getElementById("roll-dice-button-white").style.display = "block";
@@ -158,6 +161,7 @@ function toggleWhiteDiv() {
 
 }
 function toggleBlackDiv() {
+    console.log("Toggling black div.");
     document.getElementById("black-dice-div").style.display = "block";
     document.getElementById("white-dice-div").style.display = "none";
     document.getElementById("roll-dice-button-black").style.display = "block";
@@ -175,9 +179,14 @@ function startNewGame() {
         } else {
             toggleBlackDiv();
         }
+
+
     } else if(gameMode == "online") {
         //Fetch a online game id and start the game. 
         //Display waiting for player html content.
+
+
+        fetch("/")
 
     } else {
         console.error("GameMode is not correctly specified");
@@ -202,9 +211,10 @@ function offlineChangeTurn()  {
         toggleBlackDiv();
     }
 
+
+
     draw();
 }
-
 
 function updateRawMousePosition(event) {
     let rect = canvas.getBoundingClientRect();
@@ -391,6 +401,10 @@ function getPieceAtIndex(index) {
 }
 
 function pickUpPiece(index) {
+
+    if(gameFinished)
+        return;
+
     for(let i = 0; i < pieces.length; i++) {
         if(pieces[i].index == index && pieces[i].color == playerColor) {
 
@@ -434,11 +448,17 @@ function placePieceOffBoard(piece) {
     
     console.error("Could not find available space.");
 }
+function openGameTypeScreenDelayed() {
+    setTimeout(function() {
+        document.getElementById("choose-game-type-modal").style.display = "block"; 
+    }, openGameTypeScreenDelay);
+}
 function checkForWinCondition(color) {
     for(let i = 0; i < pieces.length; i++)
         if(pieces[i].color == color) return false;
     return true;
 }
+
 function putDownPiece(index) {
 
     if(index == currentAvaiablePlacementForPiece) {
@@ -446,8 +466,11 @@ function putDownPiece(index) {
         //Checking if a player is placing the piece on a winning square.
         if(index == 15 && pieceOnHand.piece.color == "white") {
 
-            if(checkForWinCondition("white"))
+            if(checkForWinCondition("white")) {
                 showOverlayText("Player white won!");
+                gameFinished = true;
+                openGameTypeScreenDelayed();
+            }
 
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
@@ -458,8 +481,11 @@ function putDownPiece(index) {
             return;
         } else if(index == 17 && pieceOnHand.piece.color == "black") {
 
-            if(checkForWinCondition("black"))
+            if(checkForWinCondition("black")) {
                 showOverlayText("Player black won!");
+                gameFinished = true;
+                openGameTypeScreenDelayed();
+            }
 
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
@@ -606,10 +632,18 @@ function rollDice() {
 
     let value = Math.round(Math.random() * maxDiceValue); // Random number 0 - 4.
 
-    if(value == 0) {
-        showOverlayText("Dice is 0. Changing turn.");
-        changeTurn();
-    }
-    return value;
+    diceValue = value;
 
+    if(diceValue == 0) {
+        console.log("This is meeting.");
+        changeTurn();
+        showOverlayText("Dice is 0. Changing turn.");
+        return;
+    }
+
+    if(calculateAllPossiblePiecePlacements().length == 0) {
+        console.log("This is meeting 2.");
+        changeTurn();
+        showOverlayText("No moves.");
+    }
 }
