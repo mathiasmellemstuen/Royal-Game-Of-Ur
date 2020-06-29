@@ -75,6 +75,18 @@ public class Controller {
         context.json("{number_of_games:" + games.size() + "}");
     }
 
+    public static void getColor(Context context) {
+        String uid = getUID(context);
+
+        if(uid == null) return;
+
+        Game game = getGame(uid);
+
+        if(game == null) return;
+
+        context.json(game.UIDToColor(uid));
+    }
+
     public static void startGameDeletionSchedule() { // Checking to see if a game needs to be deleted. This is for removing inactive games so they don't stay in memory forever.
         ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
         ses.scheduleAtFixedRate(new Runnable() {

@@ -33,7 +33,7 @@ public class Game {
     private String specialCaseMessage = "";
 
     @JsonIgnore
-    public Color UIDToColor(String uid) { // TODO: lage et api call som tar uid og gir fargen. Skal bare kalles en gang i starten av hvert spill.
+    public Color UIDToColor(String uid) {
         return uid == idPair.getWhitePlayerId() ? Color.WHITE : uid == idPair.getBlackPlayerId() ? Color.BLACK : null;
     }
     @JsonIgnore
@@ -100,7 +100,7 @@ public class Game {
         if(board.checkForWinCondition(playerTurn)) {
 
             gameState = playerTurn == Color.WHITE ? GameState.WHITE_VICTORY : GameState.BLACK_VICTORY;
-            context.json("{'status':'VALID AND VICTORY'");
+            context.json("{'status':'VALID AND VICTORY'}");
             return;
         }
 

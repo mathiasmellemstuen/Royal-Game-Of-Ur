@@ -20,6 +20,7 @@ public class Application {
         app.get("/newgame", Controller::newGame);
         app.get("/numberofgames", Controller::getNumberOfGames);
         app.get("/gameupdate", Controller::gameUpdate);
+        app.get("/color", Controller::getColor);
 
         app.post("/move", Controller::postMove);
 
