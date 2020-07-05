@@ -22,7 +22,7 @@ public class Application {
         app.get("/gameupdate", Controller::gameUpdate);
         app.get("/color", Controller::getColor);
 
-        app.post("/move", Controller::postMove);
+        app.post("/move", Controller::makeMove);
 
         //Starting the webserver:
         app.start(7000);

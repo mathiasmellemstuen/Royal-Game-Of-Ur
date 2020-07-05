@@ -81,15 +81,22 @@ var pieceOnHand = {
 var currentAvaiablePlacementForPiece = undefined;
 var canvas; 
 var context; 
-var playerColor = "white";
+var playerColor = undefined;
+var onlinePlayerTurn = undefined;
 var drawingInterval; 
 var mousePosition = {
     x:0,
     y:0
 }
-var gameID = undefined; // ID for online games. 
+var uid = undefined; //User-identification for online games.
 var gameMode = undefined; //Online or offline
 var diceValue = undefined;
+
+var onlineGameUpdateInterval = undefined;
+const onlineGameUpdateIntervalMs = 1000;
+
+var waitingForPlayerInterval = undefined;
+const waitingForPlayerIntervalMs = 1000;
 
 var overlayText = "";
 var overlayAlpha = 0.0;
@@ -168,6 +175,41 @@ function toggleBlackDiv() {
     document.getElementById("roll-dice-text-black").style.display = "none";
 }
 
+function disableBlackAndWhiteDiv() {
+    console.log("Disabling both the black and the white div.");
+    document.getElementById("black-dice-div").style.display = "none";
+    document.getElementById("white-dice-div").style.display = "none";
+    document.getElementById("roll-dice-button-black").style.display = "none";
+    document.getElementById("roll-dice-text-black").style.display = "none";
+}
+
+function onlineEnableWhiteDiv() {
+    document.getElementById("white-dice-div").style.display = "block";
+    document.getElementById("roll-dice-button-white").style.display = "none";
+
+}
+function onlineEnableBlackDiv() {
+    document.getElementById("black-dice-div").style.display = "block";
+    document.getElementById("roll-dice-button-black").style.display = "none";
+}
+
+function enableWaitingForPlayer() {
+
+    document.getElementById("waiting-for-player").style.display = "block";
+    waitingForPlayerInterval = setInterval(function() {
+        let waitingForPlayerText = document.getElementById("waiting-for-player-text").innerText;
+        document.getElementById("waiting-for-player-text").innerText = waitingForPlayerText == "Waiting for player." ? "Waiting for player.." : waitingForPlayerText == "Waiting for player.." ? "Waiting for player..." : waitingForPlayerText == "Waiting for player..." ? "Waiting for player." : "Waiting for player.";
+
+    }, waitingForPlayerIntervalMs);
+}
+
+function disableWaitingForPlayer() {
+
+    clearInterval(waitingForPlayerInterval);
+    waitingForPlayerInterval = undefined;
+    document.getElementById("waiting-for-player").style.display = "none";
+}
+
 function startNewGame() {
     
     if(gameMode == "offline") {
@@ -185,12 +227,78 @@ function startNewGame() {
         //Fetch a online game id and start the game. 
         //Display waiting for player html content.
 
+        enableWaitingForPlayer();
 
-        fetch("/")
+        fetch("/newgame").then(response => response.json()).then((response) => {
+
+            uid = JSON.parse(response).uid;
+
+            //Getting player color.
+            fetch("/color?uid=" + uid).then(color => color.json()).then((color) => {
+
+                playerColor = color.toLowerCase();
+                console.log(color);
+
+                disableBlackAndWhiteDiv();
+
+                if(playerColor == "black") {
+                    onlineEnableBlackDiv();
+                } else {
+                    onlineEnableWhiteDiv();
+                }
+            });
+
+            onlineGameUpdateInterval = setInterval(function() {
+
+                fetch("/gameupdate?uid=" + uid).then(response => response.json()).then((response) => {
+                    let gameUpdate = JSON.parse(response);
+                    handleOnlineGameUpdate(gameUpdate);
+                });
+            }, onlineGameUpdateIntervalMs);
+        });
 
     } else {
         console.error("GameMode is not correctly specified");
     }
+}
+
+function handleOnlineGameUpdate(gameUpdate) {
+    console.log(gameUpdate);
+
+    switch (gameUpdate.gamestate) {
+        case "LOBBY":
+            break;
+        case "INGAME":
+            disableWaitingForPlayer();
+            setupPiecesFromOnlineGameUpdate(gameUpdate);
+            onlinePlayerTurn = gameUpdate.playerturn.toLowerCase();
+            diceValue = gameUpdate.dicevalue;
+            break;
+        case "white_victory":
+            console.log("White victory");
+            break;
+        case "black_victory":
+            console.log("Black victory");
+            break;
+    }
+}
+
+function setupPiecesFromOnlineGameUpdate(gameUpdate) {
+    pieces = [];
+    let newPieces = gameUpdate.board.pieces;
+    for(let i = 0; i < newPieces.length; i++) {
+        let newPiece = newPieces[i];
+        newPiece.color = newPiece.color.toLowerCase();
+
+        if(pieceOnHand == undefined) {
+             pieces.push(newPiece);
+        } else {
+            if(newPiece.index == pieceOnHand.from) continue;
+
+            pieces.push(newPiece);
+        }
+    }
+    draw();
 }
 function changeTurn() {
 
@@ -210,8 +318,6 @@ function offlineChangeTurn()  {
     } else {
         toggleBlackDiv();
     }
-
-
 
     draw();
 }
@@ -277,7 +383,7 @@ function drawOverlayText() {
 
     context.font = "30px Arial";
     let textWidth = context.measureText(overlayText).width;
-    let textHeight = context.measureText("M").width;
+    let textHeight = context.measureText("M").width; // The letter m has mostly the same height as width. Therefore this as the height.
     context.fillStyle = "rgba(37, 92, 61, " + overlayAlpha + ")";
     context.fillRect((canvas.width / 2) - (textWidth / 2) - 15,textHeight - 15, textWidth + 30,textHeight + 30);
     context.fillStyle = "rgba(0, 0, 0, " + overlayAlpha + ")";

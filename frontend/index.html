@@ -30,12 +30,15 @@
                 <button class="modal-close-button">X</button>
 
                 <h2>Choose a game type</h2>
-                <label class="radio-container">Online multiplayer<input type="radio" id="online-multiplayer-radio" name="game-type" value="online"><span class="radio-circle"></span></label>
+                <label class="radio-container">Online multiplayer<input type="radio" id="online-multiplayer-radio" name="game-type" value="online" checked><span class="radio-circle"></span></label>
                 <br>
-                <label class="radio-container">Offline multiplayer<input type="radio" id="offline-multiplayer-radio" name="game-type" value="offline" checked><span class="radio-circle"></span></label>
+                <label class="radio-container">Offline multiplayer<input type="radio" id="offline-multiplayer-radio" name="game-type" value="offline"><span class="radio-circle"></span></label>
                 <br>
                 <button id="play-button" class="default-button-style">PLAY</button>
             </div>
+        </div>
+        <div id="waiting-for-player" class ="modal modal-start-closed">
+                <h2 id="waiting-for-player-text">Waiting for player.</h2>
         </div>
     </body>
 </html>

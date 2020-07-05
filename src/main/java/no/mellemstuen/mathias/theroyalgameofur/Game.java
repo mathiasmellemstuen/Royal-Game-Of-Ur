@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.javalin.http.Context;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Game {
@@ -33,9 +32,10 @@ public class Game {
     private String specialCaseMessage = "";
 
     @JsonIgnore
-    public Color UIDToColor(String uid) {
-        return uid == idPair.getWhitePlayerId() ? Color.WHITE : uid == idPair.getBlackPlayerId() ? Color.BLACK : null;
+    public Color  UIDToColor(String uid) throws NullPointerException{
+        return uid.equals(idPair.getWhitePlayerId()) ? Color.WHITE : uid.equals(idPair.getBlackPlayerId())  ? Color.BLACK : null;
     }
+
     @JsonIgnore
     public GameState getGameState() {
         return gameState;
@@ -131,10 +131,12 @@ public class Game {
     private void rollDice() {
         diceValue = Random.randomNumberInRange(0,4);
     }
+
     @JsonIgnore
     private void changeTurn() {
         playerTurn = playerTurn == Color.WHITE ? Color.BLACK : Color.WHITE;
     }
+
     @JsonIgnore
     public String JSONResponse() {
         try {
@@ -149,6 +151,7 @@ public class Game {
             return "INTERNAL SERVER ERROR";
         }
     }
+
     @JsonIgnore
     public boolean checkIfGameHasExpired() {
         return startTime.isAfter(LocalDateTime.now().minusHours(Controller.gameDeletionSchedulePeriodHours));
@@ -158,6 +161,6 @@ public class Game {
         this.idPair = idPair;
         this.gameState = GameState.LOBBY;
         this.board = new Board();
-        diceValue = Random.randomNumberInRange(1,4); // Can't use rollDice method because rolldice method includes rolling 0 which we don't want at the first throw because it creates issues.
+        this.diceValue = Random.randomNumberInRange(1,4); // Can't use rollDice method because rolldice method includes rolling 0 which we don't want at the first throw because it creates issues.
     }
 }

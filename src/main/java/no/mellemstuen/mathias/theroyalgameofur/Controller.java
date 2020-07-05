@@ -26,11 +26,6 @@ public class Controller {
         }
         return null;
     }
-    public static void postMove(Context context) {
-
-        String uid = getUID(context);
-    }
-
     public static void gameUpdate(Context context) {
 
         String uid = getUID(context);
@@ -58,7 +53,7 @@ public class Controller {
         //Checking if a game with a open lobby exists. If that's the case, add the player to the lobby.
         if(games.size() != 0 && games.get(games.size() - 1).getGameState() == GameState.LOBBY) {
 
-            context.json("{uid:" + games.get(games.size() - 1).getIdPair().getBlackPlayerId() + "}");
+            context.json("{\"uid\":\"" + games.get(games.size() - 1).getIdPair().getBlackPlayerId() + "\"}");
             System.out.println("Starting a new game.");
             games.get(games.size() - 1).setGameState(GameState.INGAME);
             return;
@@ -68,14 +63,15 @@ public class Controller {
 
         games.add(game);
 
-        context.json("{uid:" + game.getIdPair().getWhitePlayerId() + "}");
+        context.json("{\"uid\":\"" + game.getIdPair().getWhitePlayerId() + "\"}");
     }
 
     public static void getNumberOfGames(Context context) {
-        context.json("{number_of_games:" + games.size() + "}");
+        context.json("{\"number_of_games\":" + games.size() + "}");
     }
 
-    public static void getColor(Context context) {
+    public static void makeMove(Context context) {
+
         String uid = getUID(context);
 
         if(uid == null) return;
@@ -84,7 +80,26 @@ public class Controller {
 
         if(game == null) return;
 
-        context.json(game.UIDToColor(uid));
+        game.makeMove(context);
+    }
+    public static void getColor(Context context) {
+        String uid = getUID(context);
+
+        if(uid == null)
+            return;
+
+        Game game = getGame(uid);
+
+        if(game == null)
+            return;
+
+        try {
+            context.json(game.UIDToColor(uid));
+
+        } catch (NullPointerException e) {
+            context.json("ERROR NullPointerException: Could not find the correct player id.");
+            e.printStackTrace();
+        }
     }
 
     public static void startGameDeletionSchedule() { // Checking to see if a game needs to be deleted. This is for removing inactive games so they don't stay in memory forever.
