@@ -1,6 +1,7 @@
 package no.mellemstuen.mathias.theroyalgameofur;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class MoveRequest {
 
@@ -9,4 +10,9 @@ public class MoveRequest {
 
     @JsonAlias("to")
     public int to;
+
+    @JsonIgnore
+    public String toString() {
+        return "From: " + from + ". To: " + to;
+    }
 }

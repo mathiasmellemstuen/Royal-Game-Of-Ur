@@ -54,16 +54,30 @@ public class Game {
     @JsonIgnore
     public void makeMove(Context context) {
 
+
+        System.out.println("**********************");
+        System.out.println("****** NEW MOVE ******");
+        System.out.println("**********************");
+
         if(gameState != GameState.INGAME)
             return;
 
         String uid = Controller.getUID(context);
 
-        if(!(uid == idPair.getBlackPlayerId() && playerTurn == Color.BLACK) || !(uid == idPair.getWhitePlayerId() && playerTurn == Color.WHITE)) {
+        System.out.println("The move makers UID: " + uid);
+
+        System.out.println("The UIDS of the players in this game: ");
+        System.out.println("Black player UID: " + idPair.getBlackPlayerId());
+        System.out.println("White player UID: " + idPair.getWhitePlayerId());
+        System.out.println("\n");
+
+
+        if(!(uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)) || !(uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE))) {
+            System.out.println("Error: Either not your turn or wrong uid.");
             context.json("{'ERROR':'NOT YOUR TURN OR WRONG UID'}");
             return;
         }
-
+        System.out.println("The move maker is authenticated. Moving on. ");
         //Authenticated and your turn.
 
         String requestContent = context.body().toString();
@@ -75,6 +89,9 @@ public class Game {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println("MOVEREQUESTR: ");
+        System.out.println(moveRequest);
 
         if(moveRequest == null) {
             context.json("{'STATUS:'COULD PROCESS JSON DATA'}");
@@ -124,6 +141,7 @@ public class Game {
             changeTurn();
         }
 
+        System.out.println("Move made successfully.");
         context.json("{'STATUS':'VALID'}");
     }
 

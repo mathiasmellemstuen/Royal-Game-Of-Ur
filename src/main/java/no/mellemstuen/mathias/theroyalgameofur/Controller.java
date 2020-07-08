@@ -30,8 +30,6 @@ public class Controller {
 
         String uid = getUID(context);
 
-        System.out.println(uid);
-
         if(uid == null) {
             System.out.println("Could not find uid.");
             context.json("{error:'Could not find the uid.'}");
@@ -40,7 +38,6 @@ public class Controller {
 
         Game game = getGame(uid);
         if(game == null) {
-            System.out.println("Could not find the game.");
             context.json("{error:'Could not find the game.'}");
             return;
         }
