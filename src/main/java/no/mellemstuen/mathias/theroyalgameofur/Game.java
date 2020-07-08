@@ -71,14 +71,6 @@ public class Game {
         System.out.println("White player UID: " + idPair.getWhitePlayerId());
         System.out.println("\n");
 
-     /*   System.out.println();
-        System.out.println("DEBUGGING PRINTS: ");
-        System.out.println(!((uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)) || (uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE))));
-
-        System.out.println(playerTurn.equals(Color.BLACK));
-        System.out.println(playerTurn.equals(Color.WHITE));
-        System.out.println((uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)));
-        System.out.println((uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE)));*/
 
         if(!((uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)) || (uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE)))) {
             System.out.println("Error: Either not your turn or wrong uid.");
@@ -86,7 +78,8 @@ public class Game {
             return;
         }
         System.out.println("The move maker is authenticated. Moving on. ");
-        //Authenticated and your turn.
+
+        //Authenticated and your turn here.
 
         String requestContent = context.body().toString();
 
@@ -98,15 +91,16 @@ public class Game {
             e.printStackTrace();
         }
 
-        System.out.println("MOVEREQUESTR: ");
-        System.out.println(moveRequest);
+        System.out.println("Moverequest: " + moveRequest);
 
         if(moveRequest == null) {
+            System.out.println("Could not process delivered JSON data. Returning!");
             context.json("{'STATUS:'COULD PROCESS JSON DATA'}");
             return;
         }
 
-        if(!board.checkIfMoveIsValid(board.getPieceAtIndex(moveRequest.from),moveRequest.to,diceValue)) {
+        if(!board.checkIfMoveIsValid(board.getPieceAtIndex(moveRequest.from),moveRequest.to,diceValue, true)) {
+            System.out.println("Invalid move! Returning!");
             context.json("{'STATUS':'INVALID MOVE'}");
             return;
         }
@@ -124,16 +118,20 @@ public class Game {
 
         if(board.checkForWinCondition(playerTurn)) {
 
+            System.out.println("Wincondition for " + playerTurn.toString());
             gameState = playerTurn == Color.WHITE ? GameState.WHITE_VICTORY : GameState.BLACK_VICTORY;
             context.json("{'status':'VALID AND VICTORY'}");
             return;
         }
 
-        //Changing turn.
+
+        System.out.println("The move is valid. The piece have moved to the requested position.");
+
+        if(!board.pieceGetsBonusMove(moveRequest.to)) //Changing turn if the piece does not get a bonus move.
+            changeTurn();
+
         rollDice();
         specialCaseMessage = "";
-        changeTurn();
-
 
         //Edge case scenario where the dice roll is 0.
         while(diceValue == 0) {

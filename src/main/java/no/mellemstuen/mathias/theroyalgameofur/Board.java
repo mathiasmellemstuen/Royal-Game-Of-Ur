@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 
 public class Board {
+
     @JsonIgnore
     public static final int[] whitePath = {
             9,
@@ -24,6 +25,7 @@ public class Board {
             18,
             15
     };
+
     @JsonIgnore
     public static final int[] blackPath = {
             11,
@@ -42,6 +44,7 @@ public class Board {
             20,
             17
     };
+
     @JsonProperty("pieces")
     public ArrayList<Piece> pieces = new ArrayList<>();
 
@@ -73,51 +76,105 @@ public class Board {
     }
 
     @JsonIgnore
-    public boolean checkIfMoveIsValid(Piece piece,int to, int moveCount) {
+    public boolean checkIfMoveIsValid(Piece piece, int to, int moveCount, boolean verbose) {
 
-        if(piece == null)
+        if(verbose) {
+            System.out.println("*******************************");
+            System.out.println("** CHECKING IF MOVE IS VALID **");
+            System.out.println("*******************************");
+            System.out.println("Entering with to: " + to + " and moveCount: " + moveCount + ". The piece position is: " + piece.getIndex() + ".");
+        }
+
+        if(piece == null) {
+
+            if(verbose) System.out.println("The piece is null.");
+
             return false;
+        }
 
         int[] path = piece.getColor() == Color.WHITE ? whitePath : blackPath;
         int index;
+
 
         if(piece.getIndex() >= 24) {
 
             index = path[moveCount - 1];
 
-            if(to != index)
+            if(verbose) System.out.println("1. The path value index is: " + index);
+
+            if(to != index) {
+
+                if(verbose) System.out.println("To != index. Returing false.");
+
                 return false;
+            }
 
             if(getPieceAtIndex(to) == null) // Don't need to check for more conditions because you can't meet your opponent when your position is >= 24.
                 return true;
 
         } else {
 
-            index = path[piece.getIndex() + moveCount];
+            if(verbose) System.out.println("2. The index of the piece is: " + piece.getIndex());
 
-            if(to != index)
+            int pieceArrayIndex = pieceToArrayIndex(piece);
+
+            System.out.println("The piece array index is: " + pieceArrayIndex);
+
+            if(pieceArrayIndex == -1) {
+                if(verbose) System.out.println("2. The index is out of bounds.");
                 return false;
+            }
+
+            index = path[pieceArrayIndex + moveCount];
+
+            if(verbose) System.out.println("2. The path value index is: " + index);
+
+            if(to != index) {
+                if(verbose) System.out.println("To != index. Returing false.");
+
+                return false;
+            }
 
             if(getPieceAtIndex(to) == null || (getPieceAtIndex(to).getColor() != piece.getColor() && to != 10))
                 return true;
 
         }
+        if(verbose) System.out.println("Not meeting any of the conditions over. Returning false.");
+
         return false;
     }
 
     @JsonIgnore
+    private int pieceToArrayIndex(Piece piece) {
+
+        int[] arr = piece.getColor() == Color.WHITE ? whitePath : blackPath;
+        int pos = piece.getIndex();
+
+        for(int i = 0; i < arr.length; i++) {
+            if(arr[i] == pos) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @JsonIgnore
+    public boolean pieceGetsBonusMove(int to) { //Conditionally checking if the player gets a bonus turn.
+        return (to == 0 || to == 2 || to == 10 || to == 19 || to == 21);
+    }
+    @JsonIgnore
     public boolean haveMoves(Color playerColor, int moveCount) {
 
-        int[] path = playerColor == Color.WHITE ? whitePath : blackPath;
+        int[] path = playerColor.equals(Color.WHITE) ? whitePath : blackPath;
 
         for(Piece p: pieces) {
 
             if(p.getColor() != playerColor)
                 continue;
 
-            int index = p.getIndex() >= 24 ? path[moveCount - 1] : path[p.getIndex() + moveCount];
+            int index = p.getIndex() >= 24 ? path[moveCount - 1] : path[pieceToArrayIndex(p) + moveCount];
 
-            if(checkIfMoveIsValid(p,index,moveCount))
+            if(checkIfMoveIsValid(p,index,moveCount, false))
                 return true;
         }
         return false;
@@ -159,6 +216,7 @@ public class Board {
             }
         }
     }
+
     public Board() {
 
         pieces.add(new Piece(24, Color.WHITE));
