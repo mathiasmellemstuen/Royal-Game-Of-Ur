@@ -578,19 +578,8 @@ function putDownPiece(index) {
                 openGameTypeScreenDelayed();
             }
 
-            if(gameMode == "online") { //This is placing a piece at the winning square.
-                fetch("/move?uid=" + uid,
-                    {
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        method: "POST",
-                        body: JSON.stringify({from: pieceOnHand.from,to:index})
-                    }).then(function(res) {
-                        console.log(res)
-                    });
-            }
+            sendMove(pieceOnHand.piece.index, index);
+
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
             clearInterval(drawingInterval);
@@ -606,19 +595,7 @@ function putDownPiece(index) {
                 openGameTypeScreenDelayed();
             }
 
-            if(gameMode == "online") { //This is placing a piece at the winning square.
-                fetch("/move?uid=" + uid,
-                    {
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        method: "POST",
-                        body: JSON.stringify({from: pieceOnHand.from,to:index})
-                    }).then(function(res) {
-                    console.log(res)
-                });
-            }
+            sendMove(pieceOnHand.piece.index, index);
 
             pieceOnHand.piece = undefined;
             pieceOnHand.state = false;
@@ -633,19 +610,8 @@ function putDownPiece(index) {
 
          if((index == 10 || index == 0 || index == 2 || index == 18 || index == 20) && pieceAtIndex == undefined) { // This is all special squares, give extra turn.
 
-             if(gameMode == "online") { //This is placing a piece at the winning square.
-                 fetch("/move?uid=" + uid,
-                     {
-                         headers: {
-                             'Accept': 'application/json',
-                             'Content-Type': 'application/json'
-                         },
-                         method: "POST",
-                         body: JSON.stringify({from: pieceOnHand.from,to:index})
-                     }).then(function(res) {
-                     console.log(res)
-                 });
-             }
+            sendMove(pieceOnHand.piece.index, index);
+
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
             pieceOnHand.piece = undefined;
@@ -665,19 +631,7 @@ function putDownPiece(index) {
 
         if(pieceAtIndex == undefined) { // Valid. Placing the piece at the position.
 
-            if(gameMode == "online") { //This is placing a piece at the winning square.
-                fetch("/move?uid=" + uid,
-                    {
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        method: "POST",
-                        body: JSON.stringify({from: pieceOnHand.from,to:index})
-                    }).then(function(res) {
-                    console.log(res)
-                });
-            }
+            sendMove(pieceOnHand.piece.index, index);
 
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
@@ -699,19 +653,7 @@ function putDownPiece(index) {
 
         } else if(pieceAtIndex.color != pieceOnHand.piece.color) { // Valid. Placing the piece at the position and placing the opponents piece off the board.
 
-            if(gameMode == "online") { //This is placing a piece at the winning square.
-                fetch("/move?uid=" + uid,
-                    {
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        method: "POST",
-                        body: JSON.stringify({from: pieceOnHand.from,to:index})
-                    }).then(function(res) {
-                    console.log(res)
-                });
-            }
+            sendMove(pieceOnHand.piece.index, index);
 
             placePieceOffBoard(pieceAtIndex);
             pieceOnHand.piece.index = index;
@@ -731,6 +673,23 @@ function putDownPiece(index) {
         drawingInterval = undefined;
         draw(); // Redrawing
 
+    }
+}
+
+function sendMove(from, to) {
+    if(gameMode == "online") {
+        fetch("/move?uid=" + uid,
+            {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                method: "POST",
+                body: JSON.stringify({from: from,to:to})
+            }).then(function(res) {
+            console.log(res)
+        });
+        console.log("Sending from:" + from + " and to: " + to);
     }
 }
 function calculateAllPossiblePiecePlacements() {

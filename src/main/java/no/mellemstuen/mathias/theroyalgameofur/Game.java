@@ -71,8 +71,16 @@ public class Game {
         System.out.println("White player UID: " + idPair.getWhitePlayerId());
         System.out.println("\n");
 
+     /*   System.out.println();
+        System.out.println("DEBUGGING PRINTS: ");
+        System.out.println(!((uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)) || (uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE))));
 
-        if(!(uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)) || !(uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE))) {
+        System.out.println(playerTurn.equals(Color.BLACK));
+        System.out.println(playerTurn.equals(Color.WHITE));
+        System.out.println((uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)));
+        System.out.println((uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE)));*/
+
+        if(!((uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)) || (uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE)))) {
             System.out.println("Error: Either not your turn or wrong uid.");
             context.json("{'ERROR':'NOT YOUR TURN OR WRONG UID'}");
             return;
