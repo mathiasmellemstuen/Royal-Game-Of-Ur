@@ -178,7 +178,7 @@ function enableDicePanelRollDiceButton() {
 
 function disableDicePanelRollDiceButton() {
     dicePanel_RollDiceButton.style.display = "none";
-    dicePanel_DiceValue.style.display = "block"; 
+    dicePanel_DiceValue.style.display = "block";
 }
 
 function changeDicePanelDiceValueText() {
@@ -314,7 +314,6 @@ function offlineChangeTurn()  {
 
     changeDicePanelCurrentPlayerText();
     enableDicePanelRollDiceButton();
-
     draw();
 }
 
@@ -617,12 +616,12 @@ function putDownPiece(index) {
             draw(); // Redrawing
             showOverlayText("Bonus turn!");
             diceValue = 0;
-            if(playerColor == "white") {
-                toggleWhiteDiv();
-            } else {
-                toggleBlackDiv();
-            }
-            return;
+
+            //Instead of changeTurn();
+            changeDicePanelCurrentPlayerText();
+            enableDicePanelRollDiceButton();
+
+             return;
         }
 
         if(pieceAtIndex == undefined) { // Valid. Placing the piece at the position.
@@ -766,11 +765,13 @@ function rollDice() {
     if(diceValue == 0) {
         changeTurn();
         showOverlayText("Dice is 0. Changing turn.");
+        enableDicePanelRollDiceButton();
         return;
     }
 
     if(calculateAllPossiblePiecePlacements().length == 0) {
         changeTurn();
         showOverlayText("No moves.");
+        enableDicePanelRollDiceButton();
     }
 }
