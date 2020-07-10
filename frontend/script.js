@@ -108,6 +108,14 @@ var image_white_stone = new Image();
 var image_black_stone = new Image(); 
 
 var gameFinished = false;
+var lastShownedMessage = "";
+
+
+var dicePanel = undefined;
+var dicePanel_CurrentPlayer = undefined;
+var dicePanel_CurrentPlayerButton = undefined;
+var dicePanel_DiceValue = undefined;
+var dicePanel_RollDiceButton = undefined;
 
 image_tile.src="/graphics/Tile.png";
 image_flower.src="/graphics/Flower_Tile.png";
@@ -115,6 +123,13 @@ image_white_stone.src="/graphics/White_Stone.png";
 image_black_stone.src="/graphics/Black_Stone.png"; 
 
 window.onload = function() {
+
+    dicePanel = document.getElementById("dice-panel");
+    dicePanel_CurrentPlayer = document.getElementById("dice-panel-current-player");
+    dicePanel_CurrentPlayerButton = document.getElementById("dice-panel-current-player-button");
+    dicePanel_DiceValue = document.getElementById("dice-panel-dice-value");
+    dicePanel_RollDiceButton = document.getElementById("dice-panel-roll-dice-button");
+    dicePanel_RollDiceButton.addEventListener("click", diceButtonClick);
 
     canvas = document.getElementById("canvas"); 
     context = canvas.getContext("2d"); 
@@ -132,67 +147,51 @@ window.onload = function() {
             element.parentElement.parentElement.style.display = "none";
         });
     }
-
-    document.getElementById("roll-dice-button-white").addEventListener("click", diceButtonWhiteClick);
-    document.getElementById("roll-dice-button-black").addEventListener("click", diceButtonBlackClick);
-
     document.getElementById("play-button").addEventListener("click", function() {
         gameMode = document.querySelector('input[name="game-type"]:checked').value;
         startNewGame(); 
         document.getElementById("play-button").parentElement.parentElement.style.display = "none";
     });
-
-    document.getElementById("white-dice-div").style.display = "block";
-    document.getElementById("black-dice-div").style.display = "none";
 }
 
-function diceButtonWhiteClick() {
+function diceButtonClick() {
     rollDice();
-    document.getElementById("roll-dice-button-white").style.display = "none";
-    document.getElementById("roll-dice-text-white").style.display = "block";
-    document.getElementById("roll-dice-text-white").innerHTML = diceValue;
-}
-
-function diceButtonBlackClick() {
-    rollDice();
-    document.getElementById("roll-dice-button-black").style.display = "none";
-    document.getElementById("roll-dice-text-black").style.display = "block";
-    document.getElementById("roll-dice-text-black").innerHTML = diceValue;
-}
-function toggleWhiteDiv() {
-    console.log("Toggling white div.");
-    document.getElementById("white-dice-div").style.display = "block";
-    document.getElementById("black-dice-div").style.display = "none";
-    document.getElementById("roll-dice-button-white").style.display = "block";
-    document.getElementById("roll-dice-text-white").style.display = "none";
+    disableDicePanelRollDiceButton();
+    changeDicePanelDiceValueText();
 
 }
-function toggleBlackDiv() {
-    console.log("Toggling black div.");
-    document.getElementById("black-dice-div").style.display = "block";
-    document.getElementById("white-dice-div").style.display = "none";
-    document.getElementById("roll-dice-button-black").style.display = "block";
-    document.getElementById("roll-dice-text-black").style.display = "none";
+
+function initDicePanelOnline() {
+    dicePanel.style.display = "block";
+    dicePanel_DiceValue.style.display = "none";
 }
 
-function disableBlackAndWhiteDiv() {
-    console.log("Disabling both the black and the white div.");
-    document.getElementById("black-dice-div").style.display = "none";
-    document.getElementById("white-dice-div").style.display = "none";
-    document.getElementById("roll-dice-button-black").style.display = "none";
-    document.getElementById("roll-dice-text-black").style.display = "none";
+function initDicePanelOffline() {
+    dicePanel.style.display = "block";
+    dicePanel_DiceValue.style.display = "none";
 }
 
-function onlineEnableWhiteDiv() {
-    document.getElementById("white-dice-div").style.display = "block";
-    document.getElementById("roll-dice-button-white").style.display = "none";
-
-}
-function onlineEnableBlackDiv() {
-    document.getElementById("black-dice-div").style.display = "block";
-    document.getElementById("roll-dice-button-black").style.display = "none";
+function enableDicePanelRollDiceButton() {
+    dicePanel_RollDiceButton.style.display = "block";
+    dicePanel_DiceValue.style.display = "none";
 }
 
+function disableDicePanelRollDiceButton() {
+    dicePanel_RollDiceButton.style.display = "none";
+    dicePanel_DiceValue.style.display = "block"; 
+}
+
+function changeDicePanelDiceValueText() {
+    dicePanel_DiceValue.innerHTML = "Moves: " + diceValue;
+}
+
+function changeDicePanelCurrentPlayerText() {
+    dicePanel_CurrentPlayer.innerHTML = playerColor == "white" ? "White" : "Black";
+    dicePanel_CurrentPlayer.style.color = playerColor;
+
+    dicePanel_CurrentPlayerButton.innerHTML = playerColor == "white" ? "White" : "Black";
+    dicePanel_CurrentPlayerButton.style.color = playerColor;
+}
 function enableWaitingForPlayer() {
 
     document.getElementById("waiting-for-player").style.display = "block";
@@ -214,14 +213,8 @@ function startNewGame() {
     
     if(gameMode == "offline") {
         let random = rollDice();
-        playerColor = random > 2 ? "black" : "white"; 
-
-        if(playerColor == "white") {
-            toggleWhiteDiv();
-        } else {
-            toggleBlackDiv();
-        }
-
+        playerColor = random > 2 ? "black" : "white";
+        initDicePanelOffline();
 
     } else if(gameMode == "online") {
         //Fetch a online game id and start the game. 
@@ -237,7 +230,6 @@ function startNewGame() {
             fetch("/color?uid=" + uid).then(color => color.json()).then((color) => {
 
                 playerColor = color.toLowerCase();
-                console.log(color);
 
                 disableBlackAndWhiteDiv();
 
@@ -263,16 +255,23 @@ function startNewGame() {
 }
 
 function handleOnlineGameUpdate(gameUpdate) {
-    console.log(gameUpdate);
 
     switch (gameUpdate.gamestate) {
         case "LOBBY":
             break;
         case "INGAME":
+            initDicePanelOnline();
             disableWaitingForPlayer();
             setupPiecesFromOnlineGameUpdate(gameUpdate);
             onlinePlayerTurn = gameUpdate.playerturn.toLowerCase();
             diceValue = gameUpdate.dicevalue;
+
+
+            if(gameUpdate.specialcasemessage != "" && lastShownedMessage != gameUpdate.specialcasemessage)
+                showOverlayText(gameUpdate.specialcasemessage);
+
+            lastShownedMessage = gameUpdate.specialcasemessage;
+
             break;
         case "white_victory":
             console.log("White victory");
@@ -313,11 +312,8 @@ function offlineChangeTurn()  {
     diceValue = 0;
     playerColor = playerColor == "white" ? "black" : "white";
 
-    if(playerColor == "white") {
-        toggleWhiteDiv();
-    } else {
-        toggleBlackDiv();
-    }
+    changeDicePanelCurrentPlayerText();
+    enableDicePanelRollDiceButton();
 
     draw();
 }
@@ -687,7 +683,6 @@ function sendMove(from, to) {
                 method: "POST",
                 body: JSON.stringify({from: from,to:to})
             }).then(function(res) {
-            console.log(res)
         });
         console.log("Sending from:" + from + " and to: " + to);
     }
@@ -769,14 +764,12 @@ function rollDice() {
     diceValue = value;
 
     if(diceValue == 0) {
-        console.log("This is meeting.");
         changeTurn();
         showOverlayText("Dice is 0. Changing turn.");
         return;
     }
 
     if(calculateAllPossiblePiecePlacements().length == 0) {
-        console.log("This is meeting 2.");
         changeTurn();
         showOverlayText("No moves.");
     }

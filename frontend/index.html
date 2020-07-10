@@ -2,28 +2,20 @@
 <html>
     <head>
         <meta charset="UTF-8"/>
+        <link rel="icon" type="image/png" href="graphics/Flower_Tile.png">
         <link rel="stylesheet" type="text/css" href="style.css"/>
         <script src="script.js"></script>
     </head>
     <body>
         <div id="left-content">
-            <div id="top-bar-left" class="top-bar">
-                <p style="text-align: right;"><span id="username">Brukernavn1</span> <span id="score">(1200)</span></p>
-            </div>
-            <div id="white-dice-div" style="float:right;">
-                <button id="roll-dice-button-white" class="default-button-style">Roll dice</button><br>
-                <p id="roll-dice-text-white" class="dice-text">4</p>
+            <div class="panel" id="dice-panel">
+                <h2>Player turn: <span id="dice-panel-current-player">Black</span></h2>
+                <button class="default-button-style" id="dice-panel-roll-dice-button">Roll dice for <span id="dice-panel-current-player-button">{player-color}</span></button>
+                <h2 id="dice-panel-dice-value">4</h2>
             </div>
         </div>
         <canvas id="canvas"></canvas>
-        <div id="right-content">
-            <div id="top-bar-right" class="top-bar">
-                <p><span id="opponent-username">Brukernavn2</span> <span id="opponent-score">(1200)</span></p>
-                <div id="black-dice-div" style="float:left;">
-                    <button id="roll-dice-button-black" class="default-button-style">Roll dice</button><br>
-                    <p id="roll-dice-text-black" class="dice-text">4</p>
-                </div>
-            </div>
+        <div id ="right-content">
         </div>
         <div id="choose-game-type-modal" class="modal">
             <div class="modal-content">

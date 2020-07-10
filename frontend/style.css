@@ -24,13 +24,13 @@ h1,h2,h3,h4 {
 p,span,h1,h2,h3,h4,label {
     color:white; 
 }
-#left-content {
+.left-content {
     margin:0; 
     padding:0; 
     grid-column-start: 1;
     position:relative; 
 }
-#right-content {
+.right-content {
     margin:0; 
     padding:0; 
     grid-column-start: 3;
@@ -52,9 +52,6 @@ p,span,h1,h2,h3,h4,label {
 }
 .default-button-style:hover {
     background-color: rgb(66, 156, 105);
-}
-.top-bar {
-    width:100%; 
 }
 .modal-start-hidden {
     display:none;
@@ -143,4 +140,26 @@ p,span,h1,h2,h3,h4,label {
 
 #waiting-for-player-text {
     color:white;
+}
+
+.panel {
+    background-color:#3a3a3a;
+    display:inline-block;
+    margin: 5px;
+    padding:15px;
+    float:right;
+    border-radius: 7px;
+    border: 2px solid rgb(37, 92, 61);
+}
+
+#dice-panel {
+    display: none;
+}
+#dice-panel-roll-dice-button {
+    margin-left: auto;
+    margin-right: auto;
+    display:block;
+}
+#roll-dice-offline {
+
 }
