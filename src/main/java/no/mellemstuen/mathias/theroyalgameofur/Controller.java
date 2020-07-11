@@ -106,11 +106,17 @@ public class Controller {
         ses.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                System.out.println("Deleting games!");
+                try {
+                    System.out.println("Deleting games!");
 
-                for(Game game : games) {
-                    if(game.checkIfGameHasExpired())
-                        games.remove(game);
+                    for(int i = 0; i < games.size(); i ++) {
+                        if(games.get(i) != null && games.get(i).checkIfGameHasExpired())
+                            games.remove(i);
+                    }
+                }
+                catch (Exception e) {
+                    System.out.println("Error in thread in scheduler.");
+                    e.printStackTrace();
                 }
             }
         }, 0, 1, TimeUnit.MINUTES);

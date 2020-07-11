@@ -81,6 +81,7 @@ public class Game {
         if(uid.equals(idPair.getBlackPlayerId())) {
             lastRequestFromBlack = LocalDateTime.now();
         }
+
         if(uid.equals(idPair.getWhitePlayerId())) {
             lastRequestFromWhite = LocalDateTime.now();
         }
@@ -200,5 +201,7 @@ public class Game {
         this.board = new Board();
         this.diceValue = Random.randomNumberInRange(1,4); // Can't use rollDice method because rolldice method includes rolling 0 which we don't want at the first throw because it creates issues.
         this.startTime = LocalDateTime.now();
+        this.lastRequestFromBlack = LocalDateTime.now();
+        this.lastRequestFromWhite = LocalDateTime.now();
     }
 }
