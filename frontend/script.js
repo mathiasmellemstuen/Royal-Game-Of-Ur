@@ -1,5 +1,5 @@
 /*
- Index map (for clarity)
+       INDEX map
 
     24 0  1  2  31
     25 3  4  5  32
@@ -151,10 +151,9 @@ window.onload = function() {
 }
 
 function diceButtonClick() {
-    rollDice();
     disableDicePanelRollDiceButton();
+    rollDice();
     changeDicePanelDiceValueText();
-
 }
 
 function initDicePanelOnline() {
@@ -170,6 +169,9 @@ function initDicePanelOffline() {
 function enableDicePanelRollDiceButton() {
     dicePanel_RollDiceButton.style.display = "block";
     dicePanel_DiceValue.style.display = "none";
+
+    if(gameMode == "online")
+        disableDicePanelRollDiceButton(); 
 }
 
 function disableDicePanelRollDiceButton() {
@@ -208,9 +210,8 @@ function disableWaitingForPlayer() {
 function startNewGame() {
     
     if(gameMode == "offline") {
-        let random = rollDice();
-        playerColor = random > 2 ? "black" : "white";
-        initDicePanelOffline();
+        let random = Math.round(Math.random() * 1);
+        playerColor = random == 1 ? "black" : "white";
         initDicePanelOffline();
 
     } else if(gameMode == "online") {
@@ -227,14 +228,6 @@ function startNewGame() {
             fetch("/color?uid=" + uid).then(color => color.json()).then((color) => {
 
                 playerColor = color.toLowerCase();
-
-                disableBlackAndWhiteDiv();
-
-                if(playerColor == "black") {
-                    onlineEnableBlackDiv();
-                } else {
-                    onlineEnableWhiteDiv();
-                }
             });
 
             onlineGameUpdateInterval = setInterval(function() {
@@ -476,6 +469,10 @@ function pickUpPiece(index) {
 
     if(gameFinished)
         return;
+
+
+    if(gameMode == "online" && onlinePlayerTurn != playerColor) 
+        return; 
 
     for(let i = 0; i < pieces.length; i++) {
         if(pieces[i].index == index && pieces[i].color == playerColor) {
@@ -731,6 +728,7 @@ function rollDice() {
 
     let value = Math.round(Math.random() * maxDiceValue); // Random number 0 - 4.
 
+    console.log(value); 
     diceValue = value;
 
     if(diceValue == 0) {
