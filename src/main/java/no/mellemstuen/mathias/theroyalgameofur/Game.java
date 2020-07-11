@@ -7,6 +7,7 @@ import io.javalin.http.Context;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class Game {
 
@@ -14,13 +15,13 @@ public class Game {
     private final IdPair idPair;
 
     @JsonIgnore
-    private final LocalDateTime startTime = LocalDateTime.now();
+    private LocalDateTime startTime;
 
     @JsonIgnore
     private LocalDateTime lastRequestFromWhite;
 
     @JsonIgnore
-    private LocalDateTime getLastRequestFromBlack;
+    private LocalDateTime lastRequestFromBlack;
 
     @JsonProperty("gamestate")
     private GameState gameState;
@@ -77,6 +78,12 @@ public class Game {
         System.out.println("White player UID: " + idPair.getWhitePlayerId());
         System.out.println("\n");
 
+        if(uid.equals(idPair.getBlackPlayerId())) {
+            lastRequestFromBlack = LocalDateTime.now();
+        }
+        if(uid.equals(idPair.getWhitePlayerId())) {
+            lastRequestFromWhite = LocalDateTime.now();
+        }
 
         if(!((uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)) || (uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE)))) {
             System.out.println("Error: Either not your turn or wrong uid.");
@@ -184,7 +191,7 @@ public class Game {
 
     @JsonIgnore
     public boolean checkIfGameHasExpired() {
-        return startTime.isAfter(LocalDateTime.now().minusHours(Controller.gameDeletionSchedulePeriodHours));
+        return startTime.plusHours(Controller.gameDeletionSafeHours).isAfter(LocalDateTime.now()) || lastRequestFromWhite.isAfter(LocalDateTime.now().minusMinutes(Controller.gameDeletionSchedulePeriodMinuts)) || lastRequestFromBlack.isAfter(LocalDateTime.now().minusMinutes(Controller.gameDeletionSchedulePeriodMinuts));
     }
 
     public Game(IdPair idPair) {
@@ -192,5 +199,6 @@ public class Game {
         this.gameState = GameState.LOBBY;
         this.board = new Board();
         this.diceValue = Random.randomNumberInRange(1,4); // Can't use rollDice method because rolldice method includes rolling 0 which we don't want at the first throw because it creates issues.
+        this.startTime = LocalDateTime.now();
     }
 }

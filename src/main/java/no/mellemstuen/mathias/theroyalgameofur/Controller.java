@@ -8,7 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Controller {
-    public static final int gameDeletionSchedulePeriodHours = 1; // Checking every game to see if they need to be deleted every hour. This deletes inactive games.
+    public static final int gameDeletionSafeHours = 1; //Aborting every game every hour even if it is not finished.
+    public static final int gameDeletionSchedulePeriodMinuts = 1; // Checking every game to see if they need to be deleted every minute. This deletes inactive games.
     private static ArrayList<Game> games = new ArrayList<>();
 
     public static String getUID(Context context) {
@@ -31,17 +32,18 @@ public class Controller {
         String uid = getUID(context);
 
         if(uid == null) {
-            System.out.println("Could not find uid.");
-            context.json("{error:'Could not find the uid.'}");
+            System.out.println("Could not find uid or game.");
+            context.json("aborted");
             return;
         }
 
         Game game = getGame(uid);
+
         if(game == null) {
-            context.json("{error:'Could not find the game.'}");
+            System.out.println("Could not find game.");
+            context.json("aborted");
             return;
         }
-
         context.json(game.JSONResponse());
     }
 
@@ -104,11 +106,13 @@ public class Controller {
         ses.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+                System.out.println("Deleting games!");
+
                 for(Game game : games) {
                     if(game.checkIfGameHasExpired())
                         games.remove(game);
                 }
             }
-        }, 0, 1, TimeUnit.HOURS);
+        }, 0, 1, TimeUnit.MINUTES);
     }
 }

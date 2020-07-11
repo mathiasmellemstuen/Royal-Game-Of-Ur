@@ -113,6 +113,11 @@ var dicePanel_CurrentPlayerButton = undefined;
 var dicePanel_DiceValue = undefined;
 var dicePanel_RollDiceButton = undefined;
 
+var messageModal = undefined; 
+var messageModalHeader = undefined; 
+var messageModalText = undefined; 
+var messageModalOkButton = undefined; 
+
 image_tile.src="/graphics/Tile.png";
 image_flower.src="/graphics/Flower_Tile.png";
 image_white_stone.src="/graphics/White_Stone.png";
@@ -126,6 +131,12 @@ window.onload = function() {
     dicePanel_DiceValue = document.getElementById("dice-panel-dice-value");
     dicePanel_RollDiceButton = document.getElementById("dice-panel-roll-dice-button");
     dicePanel_RollDiceButton.addEventListener("click", diceButtonClick);
+
+    messageModal = document.getElementById("message-modal"); 
+    messageModalHeader = document.getElementById("message-modal-header"); 
+    messageModalText = document.getElementById("message-modal-text"); 
+    messageModalOkButton = document.getElementById("message-modal-button"); 
+    messageModalOkButton.addEventListener("click", messageModalButtonEvent);
 
     canvas = document.getElementById("canvas"); 
     context = canvas.getContext("2d"); 
@@ -150,6 +161,15 @@ window.onload = function() {
     });
 }
 
+function messageModalButtonEvent() {
+    messageModal.style.display = "none"; 
+    document.getElementById("choose-game-type-modal").style.display = "block"; 
+}
+function openMessageModal(header, text) {
+    messageModal.style.display = "block"; 
+    messageModalHeader.innerHTML = header; 
+    messageModalText.innerHTML = text;
+}
 function diceButtonClick() {
     disableDicePanelRollDiceButton();
     rollDice();
@@ -164,6 +184,10 @@ function initDicePanelOnline() {
 function initDicePanelOffline() {
     dicePanel.style.display = "block";
     dicePanel_DiceValue.style.display = "none";
+}
+
+function disableDicePanel() {
+    dicePanel.style.display = "none"; 
 }
 
 function enableDicePanelRollDiceButton() {
@@ -249,6 +273,18 @@ function startNewGame() {
             onlineGameUpdateInterval = setInterval(function() {
 
                 fetch("/gameupdate?uid=" + uid).then(response => response.json()).then((response) => {
+
+                    if(response == "aborted") {
+                        console.log("Open game aborted screen here and close all intervals.");
+                        openMessageModal("Game aborted.", "The game is aborted."); 
+                        disableWaitingForPlayer(); 
+                        clearInterval(onlineGameUpdateInterval); 
+                        onlineGameUpdateInterval = undefined; 
+                        clearInterval(drawingInterval); 
+                        drawingInterval = undefined; 
+                        disableDicePanel();
+                        return; 
+                    }
                     let gameUpdate = JSON.parse(response);
                     handleOnlineGameUpdate(gameUpdate);
                 });
@@ -276,9 +312,21 @@ function handleOnlineGameUpdate(gameUpdate) {
             break;
         case "white_victory":
             console.log("White victory");
+            openMessageModal(playerColor == "white" ? "Victory!" : "Defeat!", playerColor == "white" ? "You won!" : "The white player won!"); 
+            clearInterval(onlineGameUpdateInterval); 
+            onlineGameUpdateInterval = undefined; 
+            clearInterval(drawingInterval); 
+            drawingInterval = undefined; 
+            disableDicePanel();
             break;
         case "black_victory":
             console.log("Black victory");
+            openMessageModal(playerColor == "black" ? "Victory!" : "Defeat!", playerColor == "black" ? "You won!" : "The white player won!"); 
+            clearInterval(onlineGameUpdateInterval); 
+            onlineGameUpdateInterval = undefined; 
+            clearInterval(drawingInterval); 
+            drawingInterval = undefined; 
+            disableDicePanel();
             break;
     }
 }
@@ -288,7 +336,6 @@ function setupPiecesFromOnlineGameUpdate(gameUpdate) {
     if(pieceOnHand.piece != undefined)  {
         console.log("Hitting this."); 
         return; 
-
     }
         
     pieces = [];
