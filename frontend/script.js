@@ -98,10 +98,6 @@ const onlineGameUpdateIntervalMs = 1000;
 var waitingForPlayerInterval = undefined;
 const waitingForPlayerIntervalMs = 1000;
 
-var overlayText = "";
-var overlayAlpha = 0.0;
-var overlayFadeFactor = 0.01;
-
 var image_tile = new Image(); 
 var image_flower = new Image(); 
 var image_white_stone = new Image(); 
@@ -215,6 +211,7 @@ function startNewGame() {
         let random = rollDice();
         playerColor = random > 2 ? "black" : "white";
         initDicePanelOffline();
+        initDicePanelOffline();
 
     } else if(gameMode == "online") {
         //Fetch a online game id and start the game. 
@@ -265,13 +262,6 @@ function handleOnlineGameUpdate(gameUpdate) {
             setupPiecesFromOnlineGameUpdate(gameUpdate);
             onlinePlayerTurn = gameUpdate.playerturn.toLowerCase();
             diceValue = gameUpdate.dicevalue;
-
-
-            if(gameUpdate.specialcasemessage != "" && lastShownedMessage != gameUpdate.specialcasemessage)
-                showOverlayText(gameUpdate.specialcasemessage);
-
-            lastShownedMessage = gameUpdate.specialcasemessage;
-
             break;
         case "white_victory":
             console.log("White victory");
@@ -367,25 +357,6 @@ function draw() {
     drawStones();
     drawCurrentPlacementsForPiece();
     drawStoneAtHand();
-    drawOverlayText();
-}
-
-function showOverlayText(text) {
-    overlayText = text;
-    overlayAlpha = 1.0;
-}
-function drawOverlayText() {
-
-    context.font = "30px Arial";
-    let textWidth = context.measureText(overlayText).width;
-    let textHeight = context.measureText("M").width; // The letter m has mostly the same height as width. Therefore this as the height.
-    context.fillStyle = "rgba(37, 92, 61, " + overlayAlpha + ")";
-    context.fillRect((canvas.width / 2) - (textWidth / 2) - 15,textHeight - 15, textWidth + 30,textHeight + 30);
-    context.fillStyle = "rgba(0, 0, 0, " + overlayAlpha + ")";
-    context.fillRect((canvas.width / 2) - (textWidth / 2) - 10,textHeight - 10, textWidth + 20,textHeight + 20);
-    context.fillStyle = "rgba(255, 255, 255, " + overlayAlpha + ")";
-    context.fillText(overlayText, (canvas.width / 2) - (textWidth / 2), 50);
-    overlayAlpha = overlayAlpha - overlayFadeFactor;
 }
 function drawCurrentPlacementsForPiece() {
 
@@ -568,7 +539,7 @@ function putDownPiece(index) {
         if(index == 15 && pieceOnHand.piece.color == "white") {
 
             if(checkForWinCondition("white")) {
-                showOverlayText("Player white won!");
+                console.log("White player won!"); 
                 gameFinished = true;
                 openGameTypeScreenDelayed();
             }
@@ -585,7 +556,7 @@ function putDownPiece(index) {
         } else if(index == 17 && pieceOnHand.piece.color == "black") {
 
             if(checkForWinCondition("black")) {
-                showOverlayText("Player black won!");
+                console.log("Black player won!"); 
                 gameFinished = true;
                 openGameTypeScreenDelayed();
             }
@@ -614,7 +585,7 @@ function putDownPiece(index) {
             clearInterval(drawingInterval);
             drawingInterval = undefined;
             draw(); // Redrawing
-            showOverlayText("Bonus turn!");
+            console.log("Bonus turn!"); 
             diceValue = 0;
 
             //Instead of changeTurn();
@@ -764,14 +735,12 @@ function rollDice() {
 
     if(diceValue == 0) {
         changeTurn();
-        showOverlayText("Dice is 0. Changing turn.");
-        enableDicePanelRollDiceButton();
+        console.log("Dice is 0. Changing turn."); 
         return;
     }
 
     if(calculateAllPossiblePiecePlacements().length == 0) {
         changeTurn();
-        showOverlayText("No moves.");
-        enableDicePanelRollDiceButton();
+        console.log("No moves. Changing turn."); 
     }
 }
