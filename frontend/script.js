@@ -159,6 +159,8 @@ window.onload = function() {
         startNewGame(); 
         document.getElementById("play-button").parentElement.parentElement.style.display = "none";
     });
+
+    draw(); 
 }
 
 function messageModalButtonEvent() {
@@ -310,7 +312,7 @@ function handleOnlineGameUpdate(gameUpdate) {
             changeDicePanelDiceValueText();
             changeDicePanelCurrentPlayerText(); 
             break;
-        case "white_victory":
+        case "WHITE_VICTORY":
             console.log("White victory");
             openMessageModal(playerColor == "white" ? "Victory!" : "Defeat!", playerColor == "white" ? "You won!" : "The white player won!"); 
             clearInterval(onlineGameUpdateInterval); 
@@ -319,7 +321,7 @@ function handleOnlineGameUpdate(gameUpdate) {
             drawingInterval = undefined; 
             disableDicePanel();
             break;
-        case "black_victory":
+        case "BLACK_VICTORY":
             console.log("Black victory");
             openMessageModal(playerColor == "black" ? "Victory!" : "Defeat!", playerColor == "black" ? "You won!" : "The white player won!"); 
             clearInterval(onlineGameUpdateInterval); 
@@ -592,8 +594,8 @@ function putDownPiece(index) {
 
     if(index == currentAvaiablePlacementForPiece) {
 
-        //Checking if a player is placing the piece on a winning square.
-        if((index == 15 && pieceOnHand.piece.color == "white") || (index == 17 && pieceOnHand.piece.color == "black")) {
+        //Checking if a player is placing the piece on a winning square. This is only for offline mode. In online mode this is happening when receiving the update from the server.
+        if(gameMode == "offline" && ((index == 15 && pieceOnHand.piece.color == "white") || (index == 17 && pieceOnHand.piece.color == "black"))) {
 
             if(checkForWinCondition("white")) {
                 console.log("White player won!"); 

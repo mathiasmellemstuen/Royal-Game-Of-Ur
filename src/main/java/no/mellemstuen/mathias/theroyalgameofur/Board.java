@@ -69,7 +69,7 @@ public class Board {
     @JsonIgnore
     public boolean checkForWinCondition(Color pieceColor) {
         for(Piece piece : pieces)
-            if(piece.getColor() == pieceColor)
+            if(piece.getColor().equals(pieceColor))
                 return false;
 
         return true;
@@ -171,6 +171,9 @@ public class Board {
 
             if(p.getColor() != playerColor)
                 continue;
+
+            if(pieceToArrayIndex(p) + moveCount >= path.length)
+                return false;
 
             int index = p.getIndex() >= 24 ? path[moveCount - 1] : path[pieceToArrayIndex(p) + moveCount];
 

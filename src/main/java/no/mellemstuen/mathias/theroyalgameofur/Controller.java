@@ -8,8 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Controller {
-    public static final int gameDeletionSafeHours = 1; //Aborting every game every hour even if it is not finished.
-    public static final int gameDeletionSchedulePeriodMinuts = 1; // Checking every game to see if they need to be deleted every minute. This deletes inactive games.
+    public static final int gameDeletionHours = 1; //Aborting every game every hour even if it is not finished.
+    public static final int gameDeletionScheduleMinutes = 3;
     private static ArrayList<Game> games = new ArrayList<>();
 
     public static String getUID(Context context) {
@@ -96,7 +96,7 @@ public class Controller {
             context.json(game.UIDToColor(uid));
 
         } catch (NullPointerException e) {
-            context.json("ERROR NullPointerException: Could not find the correct player id.");
+            context.json("\"ERROR NullPointerException: Could not find the correct player id.\"");
             e.printStackTrace();
         }
     }
@@ -119,6 +119,6 @@ public class Controller {
                     e.printStackTrace();
                 }
             }
-        }, 0, 1, TimeUnit.MINUTES);
+        }, 0, gameDeletionScheduleMinutes, TimeUnit.MINUTES);
     }
 }

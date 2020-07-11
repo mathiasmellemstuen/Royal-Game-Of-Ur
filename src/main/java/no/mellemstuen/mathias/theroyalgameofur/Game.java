@@ -7,7 +7,6 @@ import io.javalin.http.Context;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 public class Game {
 
@@ -88,7 +87,7 @@ public class Game {
 
         if(!((uid.equals(idPair.getBlackPlayerId()) && playerTurn.equals(Color.BLACK)) || (uid.equals(idPair.getWhitePlayerId()) && playerTurn.equals(Color.WHITE)))) {
             System.out.println("Error: Either not your turn or wrong uid.");
-            context.json("{'ERROR':'NOT YOUR TURN OR WRONG UID'}");
+            context.json("\"NOT YOUR TURN OR WRONG UID\"");
             return;
         }
         System.out.println("The move maker is authenticated. Moving on. ");
@@ -109,17 +108,21 @@ public class Game {
 
         if(moveRequest == null) {
             System.out.println("Could not process delivered JSON data. Returning!");
-            context.json("{'STATUS:'COULD PROCESS JSON DATA'}");
+            context.json("\"COULD NOT PROCESS JSON\"");
             return;
         }
 
         if(!board.checkIfMoveIsValid(board.getPieceAtIndex(moveRequest.from),moveRequest.to,diceValue, true)) {
             System.out.println("Invalid move! Returning!");
-            context.json("{'STATUS':'INVALID MOVE'}");
+            context.json("\"INVALID MOVE\"");
             return;
         }
 
-        if(board.getPieceAtIndex(moveRequest.to) != null && board.getPieceAtIndex(moveRequest.to).getColor() != playerTurn) {
+        if(moveRequest.to == 17 || moveRequest.to == 15) {
+            System.out.println("Removing piece.");
+            board.removePieceAtIndex(moveRequest.from);
+        }
+        else if(board.getPieceAtIndex(moveRequest.to) != null && board.getPieceAtIndex(moveRequest.to).getColor() != playerTurn) {
 
             board.putPieceBackAtStartPosition(board.getPieceAtIndex(moveRequest.to));
             board.getPieceAtIndex(moveRequest.from).setIndex(moveRequest.to);
@@ -134,7 +137,7 @@ public class Game {
 
             System.out.println("Wincondition for " + playerTurn.toString());
             gameState = playerTurn == Color.WHITE ? GameState.WHITE_VICTORY : GameState.BLACK_VICTORY;
-            context.json("{'status':'VALID AND VICTORY'}");
+            context.json("\"VICTORY\"");
             return;
         }
 
@@ -162,7 +165,7 @@ public class Game {
         }
 
         System.out.println("Move made successfully.");
-        context.json("{'STATUS':'VALID'}");
+        context.json("\"VALID\"");
     }
 
     @JsonIgnore
@@ -192,7 +195,7 @@ public class Game {
 
     @JsonIgnore
     public boolean checkIfGameHasExpired() {
-        return startTime.plusHours(Controller.gameDeletionSafeHours).isAfter(LocalDateTime.now()) || lastRequestFromWhite.isAfter(LocalDateTime.now().minusMinutes(Controller.gameDeletionSchedulePeriodMinuts)) || lastRequestFromBlack.isAfter(LocalDateTime.now().minusMinutes(Controller.gameDeletionSchedulePeriodMinuts));
+        return startTime.plusHours(Controller.gameDeletionHours).isAfter(LocalDateTime.now()) || lastRequestFromWhite.isAfter(LocalDateTime.now().minusMinutes(Controller.gameDeletionScheduleMinutes)) || lastRequestFromBlack.isAfter(LocalDateTime.now().minusMinutes(Controller.gameDeletionScheduleMinutes));
     }
 
     public Game(IdPair idPair) {
