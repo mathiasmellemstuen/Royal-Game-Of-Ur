@@ -209,6 +209,9 @@ function disableWaitingForPlayer() {
 
 function startNewGame() {
     
+
+    drawingInterval = setInterval(draw,drawingIntervalTime); //Setting the drawing interval
+
     if(gameMode == "offline") {
         let random = Math.round(Math.random() * 1);
         playerColor = random == 1 ? "black" : "white";
@@ -280,7 +283,6 @@ function setupPiecesFromOnlineGameUpdate(gameUpdate) {
             pieces.push(newPiece);
         }
     }
-    draw();
 }
 function changeTurn() {
 
@@ -297,7 +299,6 @@ function offlineChangeTurn()  {
 
     changeDicePanelCurrentPlayerText();
     enableDicePanelRollDiceButton();
-    draw();
 }
 
 function updateRawMousePosition(event) {
@@ -309,9 +310,6 @@ function updateRawMousePosition(event) {
 }
 function onMouseMove(event) {
     updateRawMousePosition(event);
-
-    if(drawingInterval == undefined)
-        drawingInterval = setInterval(draw, drawingIntervalTime);
 }
 function getCanvasXSize() {
     return window.innerWidth / 3.5; 
@@ -320,8 +318,6 @@ function getCanvasXSize() {
 function scaleCanvas() {
     canvas.width = getCanvasXSize(); 
     canvas.height = window.innerHeight; 
-
-    draw(); //Redrawing because of the rescaling. 
 }
 
 function getTileSize() {
@@ -453,7 +449,6 @@ function onClick(event) {
 
     if(event.type == "mouseup") {
         currentAvaiablePlacementForPiece = undefined;
-        draw(); // Drawing the changes to remove the red square.
     }
 }
 
@@ -491,8 +486,6 @@ function pickUpPiece(index) {
             }
         }
     }
-    draw();
-    //drawingInterval = setInterval(draw, drawingIntervalTime);
 }
 function placePieceOffBoard(piece) {
 
@@ -530,6 +523,10 @@ function checkForWinCondition(color) {
 
 function putDownPiece(index) {
 
+    function clearPieceOnHandAndInterval() {
+        pieceOnHand.piece = undefined;
+        pieceOnHand.state = false;
+    }
     if(index == currentAvaiablePlacementForPiece) {
 
         //Checking if a player is placing the piece on a winning square.
@@ -540,14 +537,8 @@ function putDownPiece(index) {
                 gameFinished = true;
                 openGameTypeScreenDelayed();
             }
-
             sendMove(pieceOnHand.piece.index, index);
-
-            pieceOnHand.piece = undefined;
-            pieceOnHand.state = false;
-            clearInterval(drawingInterval);
-            drawingInterval = undefined;
-            draw();
+            clearPieceOnHandAndInterval();
             changeTurn();
             return;
         } else if(index == 17 && pieceOnHand.piece.color == "black") {
@@ -559,12 +550,7 @@ function putDownPiece(index) {
             }
 
             sendMove(pieceOnHand.piece.index, index);
-
-            pieceOnHand.piece = undefined;
-            pieceOnHand.state = false;
-            clearInterval(drawingInterval);
-            drawingInterval = undefined;
-            draw();
+            clearPieceOnHandAndInterval(); 
             changeTurn();
             return;
         }
@@ -577,14 +563,9 @@ function putDownPiece(index) {
 
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
-            pieceOnHand.piece = undefined;
-            pieceOnHand.state = false;
-            clearInterval(drawingInterval);
-            drawingInterval = undefined;
-            draw(); // Redrawing
+            clearPieceOnHandAndInterval(); 
             console.log("Bonus turn!"); 
             diceValue = 0;
-
             //Instead of changeTurn();
             changeDicePanelCurrentPlayerText();
             enableDicePanelRollDiceButton();
@@ -598,21 +579,13 @@ function putDownPiece(index) {
 
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
-            pieceOnHand.piece = undefined;
-            pieceOnHand.state = false;
-            clearInterval(drawingInterval);
-            drawingInterval = undefined;
-            draw(); // Redrawing
+            clearPieceOnHandAndInterval(); 
             changeTurn();
 
         } else if(pieceAtIndex.color == pieceOnHand.piece.color) { // Not valid, putting the piece back where it was.
 
             pieces.push(pieceOnHand.piece);
-            pieceOnHand.piece = undefined;
-            pieceOnHand.state = false;
-            clearInterval(drawingInterval);
-            drawingInterval = undefined;
-            draw(); // Redrawing
+            clearPieceOnHandAndInterval(); 
 
         } else if(pieceAtIndex.color != pieceOnHand.piece.color) { // Valid. Placing the piece at the position and placing the opponents piece off the board.
 
@@ -621,21 +594,12 @@ function putDownPiece(index) {
             placePieceOffBoard(pieceAtIndex);
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
-            pieceOnHand.piece = undefined;
-            pieceOnHand.state = false;
-            clearInterval(drawingInterval);
-            drawingInterval = undefined;
-            draw(); // Redrawing
+            clearPieceOnHandAndInterval(); 
             changeTurn();
         }
     } else { // Not valid. Placing the piece back where it was.
         pieces.push(pieceOnHand.piece);
-        pieceOnHand.piece = undefined;
-        pieceOnHand.state = false;
-        clearInterval(drawingInterval);
-        drawingInterval = undefined;
-        draw(); // Redrawing
-
+        clearPieceOnHandAndInterval(); 
     }
 }
 
