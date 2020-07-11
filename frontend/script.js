@@ -158,7 +158,7 @@ function diceButtonClick() {
 
 function initDicePanelOnline() {
     dicePanel.style.display = "block";
-    dicePanel_DiceValue.style.display = "none";
+    disableDicePanelRollDiceButton();
 }
 
 function initDicePanelOffline() {
@@ -184,6 +184,19 @@ function changeDicePanelDiceValueText() {
 }
 
 function changeDicePanelCurrentPlayerText() {
+
+    if(gameMode == "online") {
+        
+        if(onlinePlayerTurn == playerColor) {
+            dicePanel_CurrentPlayer.innerHTML = "Your turn."; 
+            dicePanel_CurrentPlayer.style.color = playerColor;
+            return; 
+        }
+        dicePanel_CurrentPlayer.innerHTML = onlinePlayerTurn == "white" ? "White" : "Black";
+        dicePanel_CurrentPlayer.style.color = onlinePlayerTurn;
+        return; 
+    }
+
     dicePanel_CurrentPlayer.innerHTML = playerColor == "white" ? "White" : "Black";
     dicePanel_CurrentPlayer.style.color = playerColor;
 
@@ -258,6 +271,8 @@ function handleOnlineGameUpdate(gameUpdate) {
             setupPiecesFromOnlineGameUpdate(gameUpdate);
             onlinePlayerTurn = gameUpdate.playerturn.toLowerCase();
             diceValue = gameUpdate.dicevalue;
+            changeDicePanelDiceValueText();
+            changeDicePanelCurrentPlayerText(); 
             break;
         case "white_victory":
             console.log("White victory");
@@ -269,19 +284,19 @@ function handleOnlineGameUpdate(gameUpdate) {
 }
 
 function setupPiecesFromOnlineGameUpdate(gameUpdate) {
+
+    if(pieceOnHand.piece != undefined)  {
+        console.log("Hitting this."); 
+        return; 
+
+    }
+        
     pieces = [];
     let newPieces = gameUpdate.board.pieces;
     for(let i = 0; i < newPieces.length; i++) {
         let newPiece = newPieces[i];
         newPiece.color = newPiece.color.toLowerCase();
-
-        if(pieceOnHand == undefined) {
-             pieces.push(newPiece);
-        } else {
-            if(newPiece.index == pieceOnHand.from) continue;
-
-            pieces.push(newPiece);
-        }
+        pieces.push(newPiece); 
     }
 }
 function changeTurn() {
@@ -523,34 +538,29 @@ function checkForWinCondition(color) {
 
 function putDownPiece(index) {
 
-    function clearPieceOnHandAndInterval() {
+    function clearPieceOnHand() {
         pieceOnHand.piece = undefined;
         pieceOnHand.state = false;
     }
+
     if(index == currentAvaiablePlacementForPiece) {
 
         //Checking if a player is placing the piece on a winning square.
-        if(index == 15 && pieceOnHand.piece.color == "white") {
+        if((index == 15 && pieceOnHand.piece.color == "white") || (index == 17 && pieceOnHand.piece.color == "black")) {
 
             if(checkForWinCondition("white")) {
                 console.log("White player won!"); 
                 gameFinished = true;
                 openGameTypeScreenDelayed();
             }
-            sendMove(pieceOnHand.piece.index, index);
-            clearPieceOnHandAndInterval();
-            changeTurn();
-            return;
-        } else if(index == 17 && pieceOnHand.piece.color == "black") {
 
             if(checkForWinCondition("black")) {
                 console.log("Black player won!"); 
                 gameFinished = true;
                 openGameTypeScreenDelayed();
             }
-
             sendMove(pieceOnHand.piece.index, index);
-            clearPieceOnHandAndInterval(); 
+            clearPieceOnHand();
             changeTurn();
             return;
         }
@@ -563,12 +573,15 @@ function putDownPiece(index) {
 
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
-            clearPieceOnHandAndInterval(); 
+            clearPieceOnHand(); 
             console.log("Bonus turn!"); 
             diceValue = 0;
+
             //Instead of changeTurn();
-            changeDicePanelCurrentPlayerText();
-            enableDicePanelRollDiceButton();
+            if(gameMode == "offline") {
+                changeDicePanelCurrentPlayerText();
+                enableDicePanelRollDiceButton();
+            }
 
              return;
         }
@@ -579,13 +592,13 @@ function putDownPiece(index) {
 
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
-            clearPieceOnHandAndInterval(); 
+            clearPieceOnHand(); 
             changeTurn();
 
         } else if(pieceAtIndex.color == pieceOnHand.piece.color) { // Not valid, putting the piece back where it was.
 
             pieces.push(pieceOnHand.piece);
-            clearPieceOnHandAndInterval(); 
+            clearPieceOnHand(); 
 
         } else if(pieceAtIndex.color != pieceOnHand.piece.color) { // Valid. Placing the piece at the position and placing the opponents piece off the board.
 
@@ -594,12 +607,12 @@ function putDownPiece(index) {
             placePieceOffBoard(pieceAtIndex);
             pieceOnHand.piece.index = index;
             pieces.push(pieceOnHand.piece);
-            clearPieceOnHandAndInterval(); 
+            clearPieceOnHand(); 
             changeTurn();
         }
     } else { // Not valid. Placing the piece back where it was.
         pieces.push(pieceOnHand.piece);
-        clearPieceOnHandAndInterval(); 
+        clearPieceOnHand(); 
     }
 }
 

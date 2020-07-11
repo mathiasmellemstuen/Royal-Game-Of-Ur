@@ -16,6 +16,12 @@ public class Game {
     @JsonIgnore
     private final LocalDateTime startTime = LocalDateTime.now();
 
+    @JsonIgnore
+    private LocalDateTime lastRequestFromWhite;
+
+    @JsonIgnore
+    private LocalDateTime getLastRequestFromBlack;
+
     @JsonProperty("gamestate")
     private GameState gameState;
 
