@@ -22,6 +22,7 @@ public class Application {
         app.get("/color", Controller::getColor);
 
         app.post("/move", Controller::makeMove);
+        app.post("/resign", Controller::resign);
 
         //Starting the webserver:
         app.start(7000);

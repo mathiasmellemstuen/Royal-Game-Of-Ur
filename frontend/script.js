@@ -11,7 +11,6 @@
        21 22 23
 */
 const openGameTypeScreenDelay = 3000;
-const drawingIntervalTime = 20;
 const maxDiceValue = 4;
 const onlineGameUpdateIntervalMs = 1000;
 const waitingForPlayerIntervalMs = 1000;
@@ -88,11 +87,14 @@ var mousePosition = { x:0, y:0 }
 var uid = undefined; //User-identification for online games.
 var gameMode = undefined; //Online or offline
 var diceValue = undefined;
+var drawingIntervalTime = 16.6666667; // approx. 20 ms per frame. 
+
+var openStartPage = true; 
 
 var onlineGameUpdateInterval = undefined;
 var waitingForPlayerInterval = undefined;
 
-var gameFinished = false;
+var gameFinished = true;
 var lastShownedMessage = "";
 
 var dicePanel = undefined;
@@ -105,6 +107,10 @@ var messageModal = undefined;
 var messageModalHeader = undefined; 
 var messageModalText = undefined; 
 var messageModalOkButton = undefined; 
+
+var settingsIcon = undefined; 
+var newGameIcon = undefined; 
+var resignIcon = undefined; 
 
 var specialCaseContainer = undefined; 
 var lastSpecialCaseMessage = ""; 
@@ -134,13 +140,32 @@ window.onload = function() {
     messageModalOkButton = document.getElementById("message-modal-button"); 
     messageModalOkButton.addEventListener("click", messageModalButtonEvent);
 
+    settingsIcon = document.getElementById("settings-icon"); 
+    newGameIcon = document.getElementById("new-game-icon"); 
+    resignIcon = document.getElementById("resign-icon");
+
+    settingsIcon.addEventListener("click", openSettings); 
+    newGameIcon.addEventListener("click", newGameIconEvent)
+    resignIcon.addEventListener("click", resign); 
+
     specialCaseContainer = document.getElementById("special-case-container"); 
+
+    loadCookies(); 
+
+    if(openStartPage) {
+        document.getElementById("start-page-modal").style.display = "block"; 
+    }
+    document.getElementById("refreshrate-settings").value = getFps(); 
+    document.getElementById("open-start-page-settings").checked = openStartPage; 
+    document.getElementById("settings-modal-save-button").addEventListener("click", saveSettingsButton); 
+    document.getElementById("start-page-modal-button").addEventListener("click", startPageModalButton); 
 
     canvas = document.getElementById("canvas"); 
     context = canvas.getContext("2d"); 
     context.font = "Roboto";
 
     scaleCanvas();
+
     window.addEventListener("resize", scaleCanvas); 
     canvas.addEventListener("mousedown", onClick); 
     canvas.addEventListener("mouseup", onClick); 
@@ -157,13 +182,111 @@ window.onload = function() {
         startNewGame(); 
         document.getElementById("play-button").parentElement.parentElement.style.display = "none";
     });
+    draw();
 
-    draw(); 
 }
 
+function startPageModalButton() {
+    document.getElementById("start-page-modal").style.display = "none"; 
+    openStartPage = document.getElementById("open-start-page-start-page").checked == true ? false : true; 
+    saveCookies(); 
+}
+function saveSettingsButton() {
+    
+    setFps(document.getElementById("refreshrate-settings").value);
+    refreshDrawingIntervalTime(); 
+    openStartPage = document.getElementById("open-start-page-settings").checked;
+    saveCookies(); 
+    closeSettings(); 
+}
+function setFps(fps) {
+    drawingIntervalTime = 1000 / fps; 
+}
+
+function getFps() {
+    return parseInt(Math.ceil(1000 / drawingIntervalTime)); 
+}
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+function loadCookies() {
+
+    if(document.cookie == "") {
+        return; 
+    }
+
+    setFps(parseInt(getCookie("fps")));
+    openStartPage = getCookie("openstartpage") == "true" ? true : false; 
+}
+
+function saveCookies() {
+    document.cookie = "fps=" + getFps(); 
+    document.cookie = "openstartpage=" + openStartPage; 
+}
+
+function newGameIconEvent() {
+
+    if(gameFinished == false) {
+        openMessageModal("Message", "You can't start a new game while you are playing. Please resign to start a new game."); 
+    } else {
+        console.log("Opening game type screen!"); 
+        openGameTypeScreen(); 
+    }
+}
+
+function openSettings() {
+    document.getElementById("settings-modal").style.display = "block";
+}
+
+function closeSettings() {
+    document.getElementById("settings-modal").style.display = "none";
+}
+
+function resign() {
+
+    if(gameMode == "online") {
+        fetch("/resign?uid=" + uid,
+        {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: "POST",
+            body: ""
+        });
+    } else {
+        gameFinished = true;
+        disableConfirmationLeaving(); 
+        openGameTypeScreen();
+        openMessageModal("Resignation", playerColor == "white" ? "Black won!" : "White won!"); 
+    }
+
+}
+function enableConfirmationLeaving() {
+    window.onbeforeunload = function() {
+        return "The match will be lost. Are you sure you want to leave?";
+     };
+}
+function disableConfirmationLeaving()  {
+    window.onbeforeunload = undefined; 
+}
 function messageModalButtonEvent() {
-    messageModal.style.display = "none"; 
-    document.getElementById("choose-game-type-modal").style.display = "block"; 
+    messageModal.style.display = "none";
 }
 function openMessageModal(header, text) {
     messageModal.style.display = "block"; 
@@ -289,10 +412,19 @@ function displaySpecialCaseMessages(specialcases) {
     }
 }
 
+function openGameTypeScreen() {
+    document.getElementById("choose-game-type-modal").style.display = "block";
+}
+
 function openGameTypeScreenDelayed() {
     setTimeout(function() {
         document.getElementById("choose-game-type-modal").style.display = "block"; 
     }, openGameTypeScreenDelay);
+}
+
+function refreshDrawingIntervalTime() {
+    clearInterval(drawingInterval); 
+    drawingInterval = setInterval(draw,drawingIntervalTime);
 }
 
 function draw() {
@@ -384,7 +516,11 @@ function drawStone(index, img) {
 
 function startNewGame() {
     
+    gameFinished = false; 
+
     drawingInterval = setInterval(draw,drawingIntervalTime);
+
+    enableConfirmationLeaving(); 
 
     if(gameMode == "offline") {
         let random = Math.round(Math.random() * 1);
@@ -393,6 +529,23 @@ function startNewGame() {
 
         changeDicePanelCurrentPlayerText();
         changeDicePanelDiceValueText(); 
+
+        pieces = [
+            {color:"white", index:24},
+            {color:"white", index:25},
+            {color:"white", index:26},
+            {color:"white", index:27},
+            {color:"white", index:28},
+            {color:"white", index:29},
+            {color:"white", index:30},
+            {color:"black", index:31},
+            {color:"black", index:32},
+            {color:"black", index:33},
+            {color:"black", index:34},
+            {color:"black", index:35},
+            {color:"black", index:36},
+            {color:"black", index:37}
+        ];
 
     } else if(gameMode == "online") {
 
@@ -421,6 +574,7 @@ function startNewGame() {
                         clearInterval(drawingInterval); 
                         drawingInterval = undefined; 
                         disableDicePanel();
+                        gameFinished = true;
                         return; 
                     }
                     let gameUpdate = JSON.parse(response);
@@ -461,6 +615,8 @@ function handleOnlineGameUpdate(gameUpdate) {
             clearInterval(drawingInterval); 
             drawingInterval = undefined; 
             disableDicePanel();
+            disableConfirmationLeaving(); 
+            gameFinished = true; 
             break;
         case "BLACK_VICTORY":
             console.log("Black victory");
@@ -470,6 +626,8 @@ function handleOnlineGameUpdate(gameUpdate) {
             clearInterval(drawingInterval); 
             drawingInterval = undefined; 
             disableDicePanel();
+            disableConfirmationLeaving(); 
+            gameFinished = true; 
             break;
     }
 }
@@ -642,12 +800,14 @@ function putDownPiece(index) {
                 console.log("White player won!"); 
                 gameFinished = true;
                 openGameTypeScreenDelayed();
+                disableConfirmationLeaving(); 
             }
 
             if(checkForWinCondition("black")) {
                 console.log("Black player won!"); 
                 gameFinished = true;
                 openGameTypeScreenDelayed();
+                disableConfirmationLeaving(); 
             }
             sendMove(pieceOnHand.piece.index, index);
             clearPieceOnHand();

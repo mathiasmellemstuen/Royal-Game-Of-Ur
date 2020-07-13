@@ -17,28 +17,56 @@
         </div>
         <canvas id="canvas"></canvas>
         <div id ="right-content">
+            <div class="icon-container">
+                <img id="settings-icon" class="icon" title="Settings" src="graphics/settings.svg">
+                <img id="new-game-icon" class="icon" title="New Game" src="graphics/new-game-icon.svg">
+                <img id="resign-icon" class="icon" title="Resign" src="graphics/resign-game.svg">
+            </div>
         </div>
         <div id="choose-game-type-modal" class="modal">
             <div class="modal-content">
                 <button class="modal-close-button">X</button>
-
                 <h2>Choose a game type</h2>
-                <label class="radio-container">Online multiplayer<input type="radio" id="online-multiplayer-radio" name="game-type" value="online" checked><span class="radio-circle"></span></label>
+                <label class="input-container">Online multiplayer<input type="radio" id="online-multiplayer-radio" name="game-type" value="online" checked><span class="radio-circle"></span></label>
                 <br>
-                <label class="radio-container">Offline multiplayer<input type="radio" id="offline-multiplayer-radio" name="game-type" value="offline"><span class="radio-circle"></span></label>
+                <label class="input-container">Offline multiplayer<input type="radio" id="offline-multiplayer-radio" name="game-type" value="offline"><span class="radio-circle"></span></label>
                 <br>
                 <button id="play-button" class="default-button-style">PLAY</button>
             </div>
         </div>
-        <div id="message-modal" class="modal modal-start-closed">
+        <div id="message-modal" class="modal hidden">
             <div class="modal-content">
                 <h2 id="message-modal-header">Header</h2>
                 <p id="message-modal-text">Text</p>
                 <button id="message-modal-button" class="default-button-style">OK</button>
             </div>
         </div>
-        <div id="waiting-for-player" class ="modal modal-start-closed">
+        <div id="waiting-for-player" class ="modal hidden">
                 <h2 id="waiting-for-player-text">Waiting for player.</h2>
+        </div>
+        <div id="settings-modal" class= "modal hidden">
+            <div class = "modal-content">
+                <button class="modal-close-button">X</button>
+                <h2>Settings</h2>
+                <br>
+                <label>Frames per second(fps): <input id="refreshrate-settings" type="number" name="refreshrate" class="input-field"></label>
+                <br>
+                <label class="input-container">Open the start page on page load<input id="open-start-page-settings" type="checkbox" name="openstartpage"><span class="checkmark"></span></label>
+                <br>
+                <br>
+                <button id="settings-modal-save-button" class="default-button-style">Save</button>
+            </div>
+        </div>
+        <div id="start-page-modal" class= "modal hidden">
+            <div class="modal-content">
+                <button class="modal-close-button">X</button>
+                <h1>The Royal Game Of Ur!</h1>
+                <p>Start page text...</p>
+
+                <label class="input-container">I don't want to see this in the future.<input id="open-start-page-start-page" type="checkbox" name="openstartpage"><span class="checkmark"></span></label>
+                <br>
+                <button id="start-page-modal-button" class="default-button-style">OK, let me play</button>
+            </div>
         </div>
     </body>
 </html>

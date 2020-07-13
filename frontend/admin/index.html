@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Game of ur - Admin</title>
+    <style>
+        @font-face {
+            font-family:"Roboto";
+            src: url("../Roboto-Bold.ttf") format("truetype");
+        }
+        body {
+            background-color:rgb(77, 77, 77); 
+            font-family: 'Roboto', sans-serif;
+        }
+        h1,p {
+            color:white; 
+        }
+    </style>
+</head>
+<body> 
+    <h1>Admin panel</h1>
+    <p id="number-of-games-playing">Number of games now playing: </p>
+    <script>
+
+        let numberOfGamesDOM = document.getElementById("number-of-games-playing"); 
+        setInterval(function() {
+            fetch("/numberofgames").then(response => response.json()).then((response) => {
+                let numberOfGame = JSON.parse(response).number_of_games; 
+                numberOfGamesDOM.innerHTML = "Number of games now playing: " + numberOfGame; 
+            });
+        }, 1000); 
+    </script>
+</body>
+</html>

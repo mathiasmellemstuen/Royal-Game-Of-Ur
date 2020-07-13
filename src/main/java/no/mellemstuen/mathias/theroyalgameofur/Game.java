@@ -194,6 +194,19 @@ public class Game {
     }
 
     @JsonIgnore
+    public void resign(String uid) {
+
+        if(uid.equals(idPair.getBlackPlayerId())) {
+            System.out.println("The black player resigned. White player wins!");
+            this.gameState = GameState.WHITE_VICTORY;
+        }
+
+        if(uid.equals(idPair.getWhitePlayerId())) {
+            System.out.println("The white player resigned. Black player wins!");
+            this.gameState = GameState.BLACK_VICTORY;
+        }
+    }
+    @JsonIgnore
     public boolean checkIfGameHasExpired() {
 
         boolean white = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now());

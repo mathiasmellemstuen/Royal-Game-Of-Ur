@@ -81,6 +81,18 @@ public class Controller {
 
         game.makeMove(context);
     }
+
+    public static void resign(Context context) {
+        String uid = getUID(context);
+
+        if(uid == null) return;
+
+        Game game = getGame(uid);
+
+        if(game == null) return;
+
+        game.resign(uid);
+    }
     public static void getColor(Context context) {
         String uid = getUID(context);
 
