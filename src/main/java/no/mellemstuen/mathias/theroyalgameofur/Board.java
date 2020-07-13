@@ -167,13 +167,16 @@ public class Board {
 
         int[] path = playerColor.equals(Color.WHITE) ? whitePath : blackPath;
 
+        if(moveCount == 0)
+            return false;
+
         for(Piece p: pieces) {
 
             if(p.getColor() != playerColor)
                 continue;
 
             if(pieceToArrayIndex(p) + moveCount >= path.length)
-                return false;
+                continue;
 
             int index = p.getIndex() >= 24 ? path[moveCount - 1] : path[pieceToArrayIndex(p) + moveCount];
 

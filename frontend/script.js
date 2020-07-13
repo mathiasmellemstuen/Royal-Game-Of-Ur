@@ -118,6 +118,9 @@ var messageModalHeader = undefined;
 var messageModalText = undefined; 
 var messageModalOkButton = undefined; 
 
+var specialCaseContainer = undefined; 
+var lastSpecialCaseMessage = ""; 
+
 image_tile.src="/graphics/Tile.png";
 image_flower.src="/graphics/Flower_Tile.png";
 image_white_stone.src="/graphics/White_Stone.png";
@@ -137,6 +140,8 @@ window.onload = function() {
     messageModalText = document.getElementById("message-modal-text"); 
     messageModalOkButton = document.getElementById("message-modal-button"); 
     messageModalOkButton.addEventListener("click", messageModalButtonEvent);
+
+    specialCaseContainer = document.getElementById("special-case-container"); 
 
     canvas = document.getElementById("canvas"); 
     context = canvas.getContext("2d"); 
@@ -249,16 +254,17 @@ function disableWaitingForPlayer() {
 function startNewGame() {
     
 
-    drawingInterval = setInterval(draw,drawingIntervalTime); //Setting the drawing interval
+    drawingInterval = setInterval(draw,drawingIntervalTime);
 
     if(gameMode == "offline") {
         let random = Math.round(Math.random() * 1);
         playerColor = random == 1 ? "black" : "white";
         initDicePanelOffline();
 
+        changeDicePanelCurrentPlayerText();
+        changeDicePanelDiceValueText(); 
+
     } else if(gameMode == "online") {
-        //Fetch a online game id and start the game. 
-        //Display waiting for player html content.
 
         enableWaitingForPlayer();
 
@@ -298,6 +304,50 @@ function startNewGame() {
     }
 }
 
+function displaySpecialCaseMessages(specialcases) {
+    
+    if(specialcases == "" || specialcases == undefined || !specialcases.includes(";"))
+        return;
+
+    let caseList = specialcases.split(";");
+
+    function createDOMElement(text) {
+
+        if(text == "" || text == undefined) 
+            return; 
+
+        let div = document.createElement("div"); 
+        div.classList.add("special-case-panel");
+
+        let loadingWheel = document.createElement("div"); 
+        loadingWheel.classList.add("special-case-loading-wheel");
+
+        let p = document.createElement("p"); 
+        p.innerHTML = text; 
+
+        div.appendChild(loadingWheel); 
+        div.appendChild(p); 
+
+        specialCaseContainer.appendChild(div);
+
+        setTimeout(function() { // Deleting the div after the animation has faded out. 
+            div.parentNode.removeChild(div);
+        }, 3000);
+    }
+
+    for(let i = 0; i < caseList.length; i++)  {
+
+        if(i == 0) {
+            createDOMElement(caseList[i]); 
+        } else {
+            setTimeout(function() {
+                createDOMElement(caseList[i]); 
+    
+            }, 1000);
+        }
+
+    }
+}
 function handleOnlineGameUpdate(gameUpdate) {
 
     switch (gameUpdate.gamestate) {
@@ -311,6 +361,11 @@ function handleOnlineGameUpdate(gameUpdate) {
             diceValue = gameUpdate.dicevalue;
             changeDicePanelDiceValueText();
             changeDicePanelCurrentPlayerText(); 
+
+            if(lastSpecialCaseMessage != gameUpdate.specialcasemessage)
+                displaySpecialCaseMessages(gameUpdate.specialcasemessage); 
+            lastSpecialCaseMessage = gameUpdate.specialcasemessage; 
+
             break;
         case "WHITE_VICTORY":
             console.log("White victory");
@@ -758,12 +813,15 @@ function rollDice() {
     diceValue = value;
 
     if(diceValue == 0) {
+        displaySpecialCaseMessages("Dice is 0 for " + playerColor + ". Changing turn.;");
+
         changeTurn();
         console.log("Dice is 0. Changing turn."); 
         return;
     }
 
     if(calculateAllPossiblePiecePlacements().length == 0) {
+        displaySpecialCaseMessages("No moves for " + playerColor + ". Changing turn.;"); 
         changeTurn();
         console.log("No moves. Changing turn."); 
     }

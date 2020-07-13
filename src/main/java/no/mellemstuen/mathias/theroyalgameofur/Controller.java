@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Controller {
     public static final int gameDeletionHours = 1; //Aborting every game every hour even if it is not finished.
-    public static final int gameDeletionScheduleMinutes = 3;
+    public static final int gameDeletionScheduleMinutes = 1; //Aborting a game with this amount of minutes of inactivity.
     private static ArrayList<Game> games = new ArrayList<>();
 
     public static String getUID(Context context) {
@@ -119,6 +119,6 @@ public class Controller {
                     e.printStackTrace();
                 }
             }
-        }, 0, gameDeletionScheduleMinutes, TimeUnit.MINUTES);
+        }, 0, 1, TimeUnit.MINUTES);
     }
 }

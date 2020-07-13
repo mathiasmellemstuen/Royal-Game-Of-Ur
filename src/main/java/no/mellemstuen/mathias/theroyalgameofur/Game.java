@@ -153,14 +153,14 @@ public class Game {
         //Edge case scenario where the dice roll is 0.
         while(diceValue == 0) {
             rollDice();
-            specialCaseMessage = "Dice is 0. Changing turn.";
+            specialCaseMessage += "Dice is 0 for " + playerTurn + ". Changing turn.;";
             changeTurn();
         }
 
         //Edge case scenario where the player have no moves.
         while(!board.haveMoves(playerTurn,diceValue)) {
             rollDice();
-            specialCaseMessage = "No moves. Changing turn.";
+            specialCaseMessage += "No moves for " + playerTurn + ". Changing turn.;";
             changeTurn();
         }
 
@@ -195,7 +195,12 @@ public class Game {
 
     @JsonIgnore
     public boolean checkIfGameHasExpired() {
-        return startTime.plusHours(Controller.gameDeletionHours).isAfter(LocalDateTime.now()) || lastRequestFromWhite.isAfter(LocalDateTime.now().minusMinutes(Controller.gameDeletionScheduleMinutes)) || lastRequestFromBlack.isAfter(LocalDateTime.now().minusMinutes(Controller.gameDeletionScheduleMinutes));
+
+        boolean white = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now());
+        boolean black = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now());
+        boolean start = startTime.plusHours(Controller.gameDeletionHours).isBefore(LocalDateTime.now());
+
+        return (start || white || black);
     }
 
     public Game(IdPair idPair) {
