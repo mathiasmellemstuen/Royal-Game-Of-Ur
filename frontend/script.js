@@ -111,6 +111,7 @@ var messageModalOkButton = undefined;
 var settingsIcon = undefined; 
 var newGameIcon = undefined; 
 var resignIcon = undefined; 
+var questionMarkIcon = undefined; 
 
 var specialCaseContainer = undefined; 
 var lastSpecialCaseMessage = ""; 
@@ -143,18 +144,21 @@ window.onload = function() {
     settingsIcon = document.getElementById("settings-icon"); 
     newGameIcon = document.getElementById("new-game-icon"); 
     resignIcon = document.getElementById("resign-icon");
+    questionMarkIcon = document.getElementById("questionmark-icon"); 
 
     settingsIcon.addEventListener("click", openSettings); 
     newGameIcon.addEventListener("click", newGameIconEvent)
     resignIcon.addEventListener("click", resign); 
+    questionMarkIcon.addEventListener("click", openStartPageModal); 
 
     specialCaseContainer = document.getElementById("special-case-container"); 
 
     loadCookies(); 
 
     if(openStartPage) {
-        document.getElementById("start-page-modal").style.display = "block"; 
+        openStartPageModal(); 
     }
+
     document.getElementById("refreshrate-settings").value = getFps(); 
     document.getElementById("open-start-page-settings").checked = openStartPage; 
     document.getElementById("settings-modal-save-button").addEventListener("click", saveSettingsButton); 
@@ -186,6 +190,9 @@ window.onload = function() {
 
 }
 
+function openStartPageModal() {
+    document.getElementById("start-page-modal").style.display = "block"; 
+}
 function startPageModalButton() {
     document.getElementById("start-page-modal").style.display = "none"; 
     openStartPage = document.getElementById("open-start-page-start-page").checked == true ? false : true; 
@@ -258,6 +265,9 @@ function closeSettings() {
 }
 
 function resign() {
+
+    if(gameFinished == true)
+        return; 
 
     if(gameMode == "online") {
         fetch("/resign?uid=" + uid,
@@ -677,6 +687,7 @@ function getCanvasXSize() {
 function scaleCanvas() {
     canvas.width = getCanvasXSize(); 
     canvas.height = window.innerHeight; 
+    draw();
 }
 
 function getTileSize() {
