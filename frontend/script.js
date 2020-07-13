@@ -253,7 +253,6 @@ function disableWaitingForPlayer() {
 
 function startNewGame() {
     
-
     drawingInterval = setInterval(draw,drawingIntervalTime);
 
     if(gameMode == "offline") {

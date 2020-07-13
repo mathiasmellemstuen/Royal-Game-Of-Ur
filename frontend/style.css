@@ -110,7 +110,6 @@ p,span,h1,h2,h3,h4,label {
     display:none;
 }
 .radio-container .radio-circle {
-    display:inline-block;
     width:25px;
     height:25px;
     background-color:#eee;
@@ -156,7 +155,7 @@ p,span,h1,h2,h3,h4,label {
 }
 .special-case-panel {
     background-color:#3a3a3a;
-    display:inline-block;
+    float:right;
     margin: 5px;
     padding:15px;
     border-radius: 7px;
