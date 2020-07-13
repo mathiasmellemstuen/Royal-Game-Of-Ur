@@ -155,24 +155,6 @@ p,span,h1,h2,h3,h4,label {
     transform: translate3d(-50%, -50%, 0);
     will-change: transform;
 }
-#waiting-for-player-text {
-    color:white;
-}
-#special-case-container {
-    width:100%;
-    float:right; 
-    display:flex; 
-    flex-direction: column;
-    align-items: flex-end;
-}
-#dice-panel {
-    display: none;
-}
-#dice-panel-roll-dice-button {
-    margin-left: auto;
-    margin-right: auto;
-    display:block;
-}
 .default-button-style {
     padding:5px; 
     margin:5px; 
@@ -240,7 +222,6 @@ p,span,h1,h2,h3,h4,label {
     background-color: #eee;
     border-radius: 3px;
 }
-
 .input-container:hover input ~ .checkmark {
     background-color: #ccc;
 }
@@ -258,7 +239,6 @@ p,span,h1,h2,h3,h4,label {
 .input-container input:checked ~ .checkmark:after {
     display: block;
 }
-
 .input-container .checkmark:after {
     left: 9px;
     top: 5px;
@@ -276,6 +256,23 @@ p,span,h1,h2,h3,h4,label {
 }
 
 .input-field:hover {
-    background-color:rgb(37, 92, 61);
-    color:white; 
+    background-color:rgba(240, 240, 240, 0.767);
+}
+#waiting-for-player-text {
+    color:white;
+}
+#special-case-container {
+    width:100%;
+    float:right; 
+    display:flex; 
+    flex-direction: column;
+    align-items: flex-end;
+}
+#dice-panel {
+    display: none;
+}
+#dice-panel-roll-dice-button {
+    margin-left: auto;
+    margin-right: auto;
+    display:block;
 }

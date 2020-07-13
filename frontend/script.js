@@ -193,11 +193,13 @@ window.onload = function() {
 function openStartPageModal() {
     document.getElementById("start-page-modal").style.display = "block"; 
 }
+
 function startPageModalButton() {
     document.getElementById("start-page-modal").style.display = "none"; 
     openStartPage = document.getElementById("open-start-page-start-page").checked == true ? false : true; 
     saveCookies(); 
 }
+
 function saveSettingsButton() {
     
     setFps(document.getElementById("refreshrate-settings").value);
@@ -287,22 +289,27 @@ function resign() {
     }
 
 }
+
 function enableConfirmationLeaving() {
     window.onbeforeunload = function() {
         return "The match will be lost. Are you sure you want to leave?";
      };
 }
+
 function disableConfirmationLeaving()  {
     window.onbeforeunload = undefined; 
 }
+
 function messageModalButtonEvent() {
     messageModal.style.display = "none";
 }
+
 function openMessageModal(header, text) {
     messageModal.style.display = "block"; 
     messageModalHeader.innerHTML = header; 
     messageModalText.innerHTML = text;
 }
+
 function diceButtonClick() {
     disableDicePanelRollDiceButton();
     rollDice();
@@ -687,7 +694,7 @@ function getCanvasXSize() {
 function scaleCanvas() {
     canvas.width = getCanvasXSize(); 
     canvas.height = window.innerHeight; 
-    draw();
+    draw(); //Redraw the board when rescaling the window.
 }
 
 function getTileSize() {
