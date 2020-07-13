@@ -13,6 +13,9 @@
 const openGameTypeScreenDelay = 3000;
 const drawingIntervalTime = 20;
 const maxDiceValue = 4;
+const onlineGameUpdateIntervalMs = 1000;
+const waitingForPlayerIntervalMs = 1000;
+
 const tileMap = [
     11,0,21,
     10,0,20,
@@ -74,38 +77,23 @@ var pieces = [
     {color:"black", index:36},
     {color:"black", index:37}
 ];
-var pieceOnHand = {
-    from:undefined,
-    state:false
-}
+var pieceOnHand = { from:undefined, state:false }
 var currentAvaiablePlacementForPiece = undefined;
 var canvas; 
 var context; 
 var playerColor = undefined;
 var onlinePlayerTurn = undefined;
 var drawingInterval; 
-var mousePosition = {
-    x:0,
-    y:0
-}
+var mousePosition = { x:0, y:0 }
 var uid = undefined; //User-identification for online games.
 var gameMode = undefined; //Online or offline
 var diceValue = undefined;
 
 var onlineGameUpdateInterval = undefined;
-const onlineGameUpdateIntervalMs = 1000;
-
 var waitingForPlayerInterval = undefined;
-const waitingForPlayerIntervalMs = 1000;
-
-var image_tile = new Image(); 
-var image_flower = new Image(); 
-var image_white_stone = new Image(); 
-var image_black_stone = new Image(); 
 
 var gameFinished = false;
 var lastShownedMessage = "";
-
 
 var dicePanel = undefined;
 var dicePanel_CurrentPlayer = undefined;
@@ -120,6 +108,11 @@ var messageModalOkButton = undefined;
 
 var specialCaseContainer = undefined; 
 var lastSpecialCaseMessage = ""; 
+
+var image_tile = new Image(); 
+var image_flower = new Image(); 
+var image_white_stone = new Image(); 
+var image_black_stone = new Image(); 
 
 image_tile.src="/graphics/Tile.png";
 image_flower.src="/graphics/Flower_Tile.png";
@@ -251,58 +244,6 @@ function disableWaitingForPlayer() {
     document.getElementById("waiting-for-player").style.display = "none";
 }
 
-function startNewGame() {
-    
-    drawingInterval = setInterval(draw,drawingIntervalTime);
-
-    if(gameMode == "offline") {
-        let random = Math.round(Math.random() * 1);
-        playerColor = random == 1 ? "black" : "white";
-        initDicePanelOffline();
-
-        changeDicePanelCurrentPlayerText();
-        changeDicePanelDiceValueText(); 
-
-    } else if(gameMode == "online") {
-
-        enableWaitingForPlayer();
-
-        fetch("/newgame").then(response => response.json()).then((response) => {
-
-            uid = JSON.parse(response).uid;
-
-            //Getting player color.
-            fetch("/color?uid=" + uid).then(color => color.json()).then((color) => {
-
-                playerColor = color.toLowerCase();
-            });
-
-            onlineGameUpdateInterval = setInterval(function() {
-
-                fetch("/gameupdate?uid=" + uid).then(response => response.json()).then((response) => {
-
-                    if(response == "aborted") {
-                        console.log("Open game aborted screen here and close all intervals.");
-                        openMessageModal("Game aborted.", "The game is aborted."); 
-                        disableWaitingForPlayer(); 
-                        clearInterval(onlineGameUpdateInterval); 
-                        onlineGameUpdateInterval = undefined; 
-                        clearInterval(drawingInterval); 
-                        drawingInterval = undefined; 
-                        disableDicePanel();
-                        return; 
-                    }
-                    let gameUpdate = JSON.parse(response);
-                    handleOnlineGameUpdate(gameUpdate);
-                });
-            }, onlineGameUpdateIntervalMs);
-        });
-
-    } else {
-        console.error("GameMode is not correctly specified");
-    }
-}
-
 function displaySpecialCaseMessages(specialcases) {
     
     if(specialcases == "" || specialcases == undefined || !specialcases.includes(";"))
@@ -347,115 +288,11 @@ function displaySpecialCaseMessages(specialcases) {
 
     }
 }
-function handleOnlineGameUpdate(gameUpdate) {
 
-    switch (gameUpdate.gamestate) {
-        case "LOBBY":
-            break;
-        case "INGAME":
-            initDicePanelOnline();
-            disableWaitingForPlayer();
-            setupPiecesFromOnlineGameUpdate(gameUpdate);
-            onlinePlayerTurn = gameUpdate.playerturn.toLowerCase();
-            diceValue = gameUpdate.dicevalue;
-            changeDicePanelDiceValueText();
-            changeDicePanelCurrentPlayerText(); 
-
-            if(lastSpecialCaseMessage != gameUpdate.specialcasemessage)
-                displaySpecialCaseMessages(gameUpdate.specialcasemessage); 
-            lastSpecialCaseMessage = gameUpdate.specialcasemessage; 
-
-            break;
-        case "WHITE_VICTORY":
-            console.log("White victory");
-            openMessageModal(playerColor == "white" ? "Victory!" : "Defeat!", playerColor == "white" ? "You won!" : "The white player won!"); 
-            clearInterval(onlineGameUpdateInterval); 
-            onlineGameUpdateInterval = undefined; 
-            clearInterval(drawingInterval); 
-            drawingInterval = undefined; 
-            disableDicePanel();
-            break;
-        case "BLACK_VICTORY":
-            console.log("Black victory");
-            openMessageModal(playerColor == "black" ? "Victory!" : "Defeat!", playerColor == "black" ? "You won!" : "The white player won!"); 
-            clearInterval(onlineGameUpdateInterval); 
-            onlineGameUpdateInterval = undefined; 
-            clearInterval(drawingInterval); 
-            drawingInterval = undefined; 
-            disableDicePanel();
-            break;
-    }
-}
-
-function setupPiecesFromOnlineGameUpdate(gameUpdate) {
-
-    if(pieceOnHand.piece != undefined)  {
-        console.log("Hitting this."); 
-        return; 
-    }
-        
-    pieces = [];
-    let newPieces = gameUpdate.board.pieces;
-    for(let i = 0; i < newPieces.length; i++) {
-        let newPiece = newPieces[i];
-        newPiece.color = newPiece.color.toLowerCase();
-        pieces.push(newPiece); 
-    }
-}
-function changeTurn() {
-
-    if(gameMode == "offline") {
-        offlineChangeTurn();
-    } else {
-        //Change turn online.
-    }
-}
-function offlineChangeTurn()  {
-
-    diceValue = 0;
-    playerColor = playerColor == "white" ? "black" : "white";
-
-    changeDicePanelCurrentPlayerText();
-    enableDicePanelRollDiceButton();
-}
-
-function updateRawMousePosition(event) {
-    let rect = canvas.getBoundingClientRect();
-    mousePosition.x = event.clientX - rect.left;
-    mousePosition.y = event.clientY - rect.top;
-
-
-}
-function onMouseMove(event) {
-    updateRawMousePosition(event);
-}
-function getCanvasXSize() {
-    return window.innerWidth / 3.5; 
-}
-
-function scaleCanvas() {
-    canvas.width = getCanvasXSize(); 
-    canvas.height = window.innerHeight; 
-}
-
-function getTileSize() {
-    return getCanvasXSize() / 5; 
-}
-
-function tileMapIndexToPosition(index) {
-    return {
-        x:(index % 3),
-        y:Math.floor(index / 3)
-    };
-}
-function tileMapPositionToIndex(x,y) {
-    return x <= -1 ? 24 + y : x >= 3 ? 31 + y : 3 * y + x;
-}
-function getTileImageBasedOnTileMapNumber(number) {
-    switch(number) {
-        case 11: case 21: case 1: return image_flower;
-        case 10: case 20: case 0: return image_tile;
-    }
+function openGameTypeScreenDelayed() {
+    setTimeout(function() {
+        document.getElementById("choose-game-type-modal").style.display = "block"; 
+    }, openGameTypeScreenDelay);
 }
 
 function draw() {
@@ -545,6 +382,165 @@ function drawStone(index, img) {
     context.drawImage(img, (pos.x * getTileSize()) + getTileSize(), pos.y * getTileSize(), getTileSize(), getTileSize());
 }
 
+function startNewGame() {
+    
+    drawingInterval = setInterval(draw,drawingIntervalTime);
+
+    if(gameMode == "offline") {
+        let random = Math.round(Math.random() * 1);
+        playerColor = random == 1 ? "black" : "white";
+        initDicePanelOffline();
+
+        changeDicePanelCurrentPlayerText();
+        changeDicePanelDiceValueText(); 
+
+    } else if(gameMode == "online") {
+
+        enableWaitingForPlayer();
+
+        fetch("/newgame").then(response => response.json()).then((response) => {
+
+            uid = JSON.parse(response).uid;
+
+            //Getting player color.
+            fetch("/color?uid=" + uid).then(color => color.json()).then((color) => {
+
+                playerColor = color.toLowerCase();
+            });
+
+            onlineGameUpdateInterval = setInterval(function() {
+
+                fetch("/gameupdate?uid=" + uid).then(response => response.json()).then((response) => {
+
+                    if(response == "aborted") {
+                        console.log("Open game aborted screen here and close all intervals.");
+                        openMessageModal("Game aborted.", "The game is aborted."); 
+                        disableWaitingForPlayer(); 
+                        clearInterval(onlineGameUpdateInterval); 
+                        onlineGameUpdateInterval = undefined; 
+                        clearInterval(drawingInterval); 
+                        drawingInterval = undefined; 
+                        disableDicePanel();
+                        return; 
+                    }
+                    let gameUpdate = JSON.parse(response);
+                    handleOnlineGameUpdate(gameUpdate);
+                });
+            }, onlineGameUpdateIntervalMs);
+        });
+
+    } else {
+        console.error("GameMode is not correctly specified");
+    }
+}
+
+function handleOnlineGameUpdate(gameUpdate) {
+
+    switch (gameUpdate.gamestate) {
+        case "LOBBY":
+            break;
+        case "INGAME":
+            initDicePanelOnline();
+            disableWaitingForPlayer();
+            setupPiecesFromOnlineGameUpdate(gameUpdate);
+            onlinePlayerTurn = gameUpdate.playerturn.toLowerCase();
+            diceValue = gameUpdate.dicevalue;
+            changeDicePanelDiceValueText();
+            changeDicePanelCurrentPlayerText(); 
+
+            if(lastSpecialCaseMessage != gameUpdate.specialcasemessage)
+                displaySpecialCaseMessages(gameUpdate.specialcasemessage); 
+            lastSpecialCaseMessage = gameUpdate.specialcasemessage; 
+
+            break;
+        case "WHITE_VICTORY":
+            console.log("White victory");
+            openMessageModal(playerColor == "white" ? "Victory!" : "Defeat!", playerColor == "white" ? "You won!" : "The white player won!"); 
+            clearInterval(onlineGameUpdateInterval); 
+            onlineGameUpdateInterval = undefined; 
+            clearInterval(drawingInterval); 
+            drawingInterval = undefined; 
+            disableDicePanel();
+            break;
+        case "BLACK_VICTORY":
+            console.log("Black victory");
+            openMessageModal(playerColor == "black" ? "Victory!" : "Defeat!", playerColor == "black" ? "You won!" : "The white player won!"); 
+            clearInterval(onlineGameUpdateInterval); 
+            onlineGameUpdateInterval = undefined; 
+            clearInterval(drawingInterval); 
+            drawingInterval = undefined; 
+            disableDicePanel();
+            break;
+    }
+}
+
+function setupPiecesFromOnlineGameUpdate(gameUpdate) {
+
+    if(pieceOnHand.piece != undefined)  {
+        console.log("Hitting this."); 
+        return; 
+    }
+        
+    pieces = [];
+    let newPieces = gameUpdate.board.pieces;
+    for(let i = 0; i < newPieces.length; i++) {
+        let newPiece = newPieces[i];
+        newPiece.color = newPiece.color.toLowerCase();
+        pieces.push(newPiece); 
+    }
+}
+function changeTurn() {
+
+    if(gameMode == "offline") {
+        offlineChangeTurn();
+    }
+}
+function offlineChangeTurn()  {
+
+    diceValue = 0;
+    playerColor = playerColor == "white" ? "black" : "white";
+
+    changeDicePanelCurrentPlayerText();
+    enableDicePanelRollDiceButton();
+}
+
+function updateRawMousePosition(event) {
+    let rect = canvas.getBoundingClientRect();
+    mousePosition.x = event.clientX - rect.left;
+    mousePosition.y = event.clientY - rect.top;
+}
+function onMouseMove(event) {
+    updateRawMousePosition(event);
+}
+function getCanvasXSize() {
+    return window.innerWidth / 3.5; 
+}
+
+function scaleCanvas() {
+    canvas.width = getCanvasXSize(); 
+    canvas.height = window.innerHeight; 
+}
+
+function getTileSize() {
+    return getCanvasXSize() / 5; 
+}
+
+function tileMapIndexToPosition(index) {
+    return {
+        x:(index % 3),
+        y:Math.floor(index / 3)
+    };
+}
+function tileMapPositionToIndex(x,y) {
+    return x <= -1 ? 24 + y : x >= 3 ? 31 + y : 3 * y + x;
+}
+function getTileImageBasedOnTileMapNumber(number) {
+    switch(number) {
+        case 11: case 21: case 1: return image_flower;
+        case 10: case 20: case 0: return image_tile;
+    }
+}
+
 function getCurrentMouseTileFromMousePosition() {
 
     let x = Math.floor(mousePosition.x / getTileSize()) - 1; // Legger på -1 fordi jeg vil at x: 0 skal være på selve brettet.
@@ -605,6 +601,7 @@ function pickUpPiece(index) {
         }
     }
 }
+
 function placePieceOffBoard(piece) {
 
     let startingIndex = piece.color == "white" ? 24 : 31; 
@@ -627,16 +624,6 @@ function placePieceOffBoard(piece) {
     }
     
     console.error("Could not find available space.");
-}
-function openGameTypeScreenDelayed() {
-    setTimeout(function() {
-        document.getElementById("choose-game-type-modal").style.display = "block"; 
-    }, openGameTypeScreenDelay);
-}
-function checkForWinCondition(color) {
-    for(let i = 0; i < pieces.length; i++)
-        if(pieces[i].color == color) return false;
-    return true;
 }
 
 function putDownPiece(index) {
@@ -734,6 +721,13 @@ function sendMove(from, to) {
         console.log("Sending from:" + from + " and to: " + to);
     }
 }
+
+function checkForWinCondition(color) {
+    for(let i = 0; i < pieces.length; i++)
+        if(pieces[i].color == color) return false;
+    return true;
+}
+
 function calculateAllPossiblePiecePlacements() {
 
     let moves = [];
@@ -766,6 +760,7 @@ function calculateAllPossiblePiecePlacements() {
 
     return moves;
 }
+
 function playerPathPositionToPlayerPathIndex(position) {
 
     if(position >= 24)
@@ -782,6 +777,7 @@ function playerPathPositionToPlayerPathIndex(position) {
 
     return undefined;
 }
+
 function calculatePiecePlacementPosition(piecePosition, pieceColor, randomNumber) {
     if(pieceColor == "white") {
         if(piecePosition >= 24) {
@@ -804,6 +800,7 @@ function calculatePiecePlacementPosition(piecePosition, pieceColor, randomNumber
     console.error("Did not find a suitable path for the values.");
     return undefined;
 }
+
 function rollDice() {
 
     let value = Math.round(Math.random() * maxDiceValue); // Random number 0 - 4.

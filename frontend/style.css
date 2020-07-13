@@ -2,6 +2,28 @@
     font-family:"Roboto";
     src: url("Roboto-Bold.ttf") format("truetype");
 }
+@keyframes spin {
+    0% {
+        transform: translate3d(-50%, -50%, 0) rotate(0deg);
+    }
+    100% {
+        transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    }
+}
+@keyframes fadeInAndOut {
+    0% {
+      opacity:0;
+    }
+    10% {
+        opacity: 1;
+    }
+    66% {
+        opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+}
 body {
     margin:0; 
     padding:0; 
@@ -125,7 +147,6 @@ p,span,h1,h2,h3,h4,label {
 .radio-container input:checked + .radio-circle {
     background-color:rgb(37, 92, 61);
 }
-
 .radio-container input:checked + .radio-circle:after {
     content:"";
     height: 10px;
@@ -137,11 +158,6 @@ p,span,h1,h2,h3,h4,label {
     top:50%;
     transform:translate(-50%,-50%);
 }
-
-#waiting-for-player-text {
-    color:white;
-}
-
 .panel {
     background-color:#3a3a3a;
     margin: 5px;
@@ -164,30 +180,6 @@ p,span,h1,h2,h3,h4,label {
     position:relative; 
     animation: fadeInAndOut ease 3s;
 }
-
-@keyframes spin {
-    0% {
-        transform: translate3d(-50%, -50%, 0) rotate(0deg);
-    }
-    100% {
-        transform: translate3d(-50%, -50%, 0) rotate(360deg);
-    }
-}
-@keyframes fadeInAndOut {
-    0% {
-      opacity:0;
-    }
-    10% {
-        opacity: 1;
-    }
-    66% {
-        opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
 .special-case-loading-wheel::before {
     animation: 2s linear infinite spin;
     animation-play-state: inherit;
@@ -203,6 +195,9 @@ p,span,h1,h2,h3,h4,label {
     transform: translate3d(-50%, -50%, 0);
     will-change: transform;
 }
+#waiting-for-player-text {
+    color:white;
+}
 #special-case-container {
     float:right; 
     display:flex; 
@@ -217,7 +212,3 @@ p,span,h1,h2,h3,h4,label {
     margin-right: auto;
     display:block;
 }
-#roll-dice-offline {
-
-}
-
