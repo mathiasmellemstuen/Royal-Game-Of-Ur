@@ -110,6 +110,7 @@ p,span,h1,h2,h3,h4,label {
     display:none;
 }
 .radio-container .radio-circle {
+    display:inline-block;
     width:25px;
     height:25px;
     background-color:#eee;
