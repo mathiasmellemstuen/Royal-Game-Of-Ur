@@ -16,14 +16,14 @@ const onlineGameUpdateIntervalMs = 1000;
 const waitingForPlayerIntervalMs = 1000;
 
 const tileMap = [
-    11,0,21,
-    10,0,20,
-    10,0,20,
-    10,1,20,
-    -1,0,-1,
-    12,0,22,
-    11,0,21,
-    10,0,20
+     6,5,6,
+     3,2,3,
+     2,4,2,
+     3,6,3,
+    -1,3,-1,
+    12,4,22,
+     6,3,6,
+     1,2,1
 ];
 
 const whitePlayerPath = [
@@ -66,15 +66,11 @@ var pieces = [
     {color:"white", index:26},
     {color:"white", index:27},
     {color:"white", index:28},
-    {color:"white", index:29},
-    {color:"white", index:30},
     {color:"black", index:31},
     {color:"black", index:32},
     {color:"black", index:33},
     {color:"black", index:34},
-    {color:"black", index:35},
-    {color:"black", index:36},
-    {color:"black", index:37}
+    {color:"black", index:35}
 ];
 var pieceOnHand = { from:undefined, state:false }
 var currentAvaiablePlacementForPiece = undefined;
@@ -116,15 +112,26 @@ var questionMarkIcon = undefined;
 var specialCaseContainer = undefined; 
 var lastSpecialCaseMessage = ""; 
 
+var image_nf1 = new Image(); 
+var image_nf2 = new Image(); 
+var image_nf3 = new Image(); 
+var image_nf4 = new Image(); 
+var image_nf5 = new Image(); 
+var image_nf6 = new Image(); 
 var image_tile = new Image(); 
-var image_flower = new Image(); 
 var image_white_stone = new Image(); 
 var image_black_stone = new Image(); 
 
+image_nf1.src = "/graphics/nf1.png";
+image_nf2.src = "/graphics/nf2.png";
+image_nf3.src = "/graphics/nf3.png";
+image_nf4.src = "/graphics/nf4.png";
+image_nf5.src = "/graphics/nf5.png";
+image_nf6.src= "/graphics/nf6.png";
 image_tile.src="/graphics/Tile.png";
-image_flower.src="/graphics/Flower_Tile.png";
 image_white_stone.src="/graphics/White_Stone.png";
-image_black_stone.src="/graphics/Black_Stone.png"; 
+image_black_stone.src="/graphics/Black_Stone.png";
+
 
 window.onload = function() {
 
@@ -553,15 +560,11 @@ function startNewGame() {
             {color:"white", index:26},
             {color:"white", index:27},
             {color:"white", index:28},
-            {color:"white", index:29},
-            {color:"white", index:30},
             {color:"black", index:31},
             {color:"black", index:32},
             {color:"black", index:33},
             {color:"black", index:34},
-            {color:"black", index:35},
-            {color:"black", index:36},
-            {color:"black", index:37}
+            {color:"black", index:35}
         ];
 
     } else if(gameMode == "online") {
@@ -711,9 +714,16 @@ function tileMapPositionToIndex(x,y) {
     return x <= -1 ? 24 + y : x >= 3 ? 31 + y : 3 * y + x;
 }
 function getTileImageBasedOnTileMapNumber(number) {
+
     switch(number) {
-        case 11: case 21: case 1: return image_flower;
-        case 10: case 20: case 0: return image_tile;
+        case 0: return image_tile;
+        case 1: return image_nf1; 
+        case 2: return image_nf2; 
+        case 3: return image_nf3; 
+        case 4: return image_nf4; 
+        case 5: return image_nf5; 
+        case 6: return image_nf6;
+
     }
 }
 

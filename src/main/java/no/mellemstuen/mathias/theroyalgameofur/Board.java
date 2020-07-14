@@ -230,14 +230,10 @@ public class Board {
         pieces.add(new Piece(26, Color.WHITE));
         pieces.add(new Piece(27, Color.WHITE));
         pieces.add(new Piece(28, Color.WHITE));
-        pieces.add(new Piece(29, Color.WHITE));
-        pieces.add(new Piece(30, Color.WHITE));
         pieces.add(new Piece(31, Color.BLACK));
         pieces.add(new Piece(32, Color.BLACK));
         pieces.add(new Piece(33, Color.BLACK));
         pieces.add(new Piece(34, Color.BLACK));
         pieces.add(new Piece(35, Color.BLACK));
-        pieces.add(new Piece(36, Color.BLACK));
-        pieces.add(new Piece(37, Color.BLACK));
     }
 }
