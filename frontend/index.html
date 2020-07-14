@@ -62,7 +62,45 @@
             <div class="modal-content">
                 <button class="modal-close-button">X</button>
                 <h1>The Royal Game Of Ur!</h1>
-                <p>Start page text...</p>
+                <p>The Royal Game of Ur is a ancient two-player strategy board game. It is estimated that it was first played in anscient Mesopotamia during the early third millennium BC. The Game of Ur remained popular until late antiquity, when it stopped being played. It is belived that the game was used for placing wagers and was a popular gambling game. Like modern backgammon, the game combines elements of both strategy and luck.</p>
+                <h2>How to play</h2>
+                <p>The royal game of ur is played by two players. You can either choose online multiplayer or offline multiplayer. If online multiplayer is chosen, you will be matched againsted a random player. You will be matched against a machine learning bot if there is no other players avaiable.</p>
+                <p>Each player will start with 5 pieces each, one player with the black pieces and the other with the white. The first player to bear all pieces off the board wins the match.</p>
+                <h3>Moves</h3>
+                <p>You will get a random number between 0 - 4 each turn. This is the number of squares you can move one of your pieces forward.</p>
+                <p>All 5 possible outcomes:</p>
+                <ul>
+                    <li>0 - move 0 squares - i.e. miss a go.</li>
+                    <li>1 - move 1 square</li>
+                    <li>2 - move 2 squares</li>
+                    <li>3 - move 3 squares</li>
+                    <li>4 - move 4 squares</li>
+                </ul>
+                <p>It's your opponents turn when you have made your move. The only exception to this is if you land on a rosette.</p>
+                <h3>Capturing</h3>
+                <p>You are capturing the opponents piece if you are landing on the same square. The opponents piece will then be moved out of the board and the opponent must start over with that piece. Capturing is only possible where both white and blacks paths joins.</p>
+                <h3>Path around the board</h3>
+                <div class="two-columns">
+                    <div class="text-under-image">
+                        <img src="graphics/tutorial/img1.png"/>
+                        <p>The path around the board can be visualized like this. The player with the white player starts at the left and the player with the black pices starts at the right. The paths joins at the middle column which makes it possible to capture your opponents pieces here.</p>
+                    </div>
+                    <div class="text-under-image">
+                        <img src="graphics/tutorial/img2.png"/>
+                        <p>The white player starts at <span style="color:orange;">#1</span> and ends at <span style="color:orange">#3</span>. The black player starts at <span style="color:orange">#2</span> and ends at <span style="color:orange">#4</span>.</p>
+                    </div>
+                </div>
+                <h3>Rosettes</h3>
+                <div class="two-columns">
+                    <div class="text-under-image">
+                        <img src="graphics/tutorial/img3.png"/>
+                        <p>If the piece lands on a <span style="color:violet;">rosette</span>, that player gets an extra turn.</p>
+                    </div>
+                    <div class="text-under-image">
+                        <img src="graphics/tutorial/img4.png"/>
+                        <p>The <span style="color:goldenrod">middle rosette</span> acts like a safe square. The opponent can't capture your piece if it's on top of this square.</p>
+                    </div>
+                </div>
                 <label class="input-container">I don't want to see this in the future.<input id="open-start-page-start-page" type="checkbox" name="openstartpage"><span class="checkmark"></span></label>
                 <br>
                 <button id="start-page-modal-button" class="default-button-style">OK, let me play</button>

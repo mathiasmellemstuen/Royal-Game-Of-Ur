@@ -43,7 +43,7 @@ canvas {
 h1,h2,h3,h4 {
     text-align: center;
 }
-p,span,h1,h2,h3,h4,label {
+p,span,h1,h2,h3,h4,label,li {
     color:white; 
 }
 .left-content {
@@ -86,6 +86,7 @@ p,span,h1,h2,h3,h4,label {
     height: 100%;
     overflow: auto;
     background-color: rgba(0,0,0,0.4);
+    box-sizing: border-box;
 }
 .hidden {
     display:none;
@@ -275,4 +276,20 @@ p,span,h1,h2,h3,h4,label {
     margin-left: auto;
     margin-right: auto;
     display:block;
+}
+
+.text-under-image {
+    display: flex;
+    flex-direction: column;
+    width: 48%;
+    padding: 5px;
+    border: 2px solid rgb(37, 92, 61);
+
+}
+.two-columns {
+    display: flex;
+    flex-direction: row;
+}
+.two-columns div {
+    max-width: 50%;
 }
