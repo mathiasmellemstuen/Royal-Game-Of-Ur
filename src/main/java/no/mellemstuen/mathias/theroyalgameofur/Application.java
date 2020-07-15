@@ -12,19 +12,20 @@ public class Application {
 
         Javalin app = Javalin.create();
         app.config.enableWebjars();
-        app.config.addStaticFiles("frontend", Location.EXTERNAL);
 
         //Setting up API calls:
 
-        app.get("/newgame", Controller::newGame);
-        app.get("/numberofgames", Controller::getNumberOfGames);
-        app.get("/gameupdate", Controller::gameUpdate);
-        app.get("/color", Controller::getColor);
+        app.get("/api/newgame", Controller::newGame);
+        app.get("/api/numberofgames", Controller::getNumberOfGames);
+        app.get("/api/gameupdate", Controller::gameUpdate);
+        app.get("/api/color", Controller::getColor);
 
-        app.post("/move", Controller::makeMove);
-        app.post("/resign", Controller::resign);
+        app.post("/api/move", Controller::makeMove);
+        app.post("/api/resign", Controller::resign);
 
         //Starting the webserver:
         app.start(7000);
+
+        System.out.println("REST API is running.");
     }
 }

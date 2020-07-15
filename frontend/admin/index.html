@@ -24,7 +24,7 @@
 
         let numberOfGamesDOM = document.getElementById("number-of-games-playing"); 
         setInterval(function() {
-            fetch("/numberofgames").then(response => response.json()).then((response) => {
+            fetch("/api/numberofgames").then(response => response.json()).then((response) => {
                 let numberOfGame = JSON.parse(response).number_of_games; 
                 numberOfGamesDOM.innerHTML = "Number of games now playing: " + numberOfGame; 
             });

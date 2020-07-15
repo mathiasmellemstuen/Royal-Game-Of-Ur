@@ -279,7 +279,7 @@ function resign() {
         return; 
 
     if(gameMode == "online") {
-        fetch("/resign?uid=" + uid,
+        fetch("/api/resign?uid=" + uid,
         {
             headers: {
                 'Accept': 'application/json',
@@ -571,19 +571,19 @@ function startNewGame() {
 
         enableWaitingForPlayer();
 
-        fetch("/newgame").then(response => response.json()).then((response) => {
+        fetch("/api/newgame").then(response => response.json()).then((response) => {
 
             uid = JSON.parse(response).uid;
 
             //Getting player color.
-            fetch("/color?uid=" + uid).then(color => color.json()).then((color) => {
+            fetch("/api/color?uid=" + uid).then(color => color.json()).then((color) => {
 
                 playerColor = color.toLowerCase();
             });
 
             onlineGameUpdateInterval = setInterval(function() {
 
-                fetch("/gameupdate?uid=" + uid).then(response => response.json()).then((response) => {
+                fetch("/api/gameupdate?uid=" + uid).then(response => response.json()).then((response) => {
 
                     if(response == "aborted") {
                         console.log("Open game aborted screen here and close all intervals.");
@@ -896,7 +896,7 @@ function putDownPiece(index) {
 
 function sendMove(from, to) {
     if(gameMode == "online") {
-        fetch("/move?uid=" + uid,
+        fetch("/api/move?uid=" + uid,
             {
                 headers: {
                     'Accept': 'application/json',

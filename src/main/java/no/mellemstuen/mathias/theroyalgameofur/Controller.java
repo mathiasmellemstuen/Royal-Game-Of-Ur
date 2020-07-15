@@ -119,8 +119,6 @@ public class Controller {
             @Override
             public void run() {
                 try {
-                    System.out.println("Deleting games!");
-
                     for(int i = 0; i < games.size(); i ++) {
                         if(games.get(i) != null && games.get(i).checkIfGameHasExpired())
                             games.remove(i);
