@@ -2,6 +2,7 @@ package no.mellemstuen.mathias.theroyalgameofur;
 
 import io.javalin.http.Context;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -113,11 +114,18 @@ public class Controller {
         }
     }
 
-    public static void startGameDeletionSchedule() { // Checking to see if a game needs to be deleted. This is for removing inactive games so they don't stay in memory forever.
+    public static void startGameDeletionAndBotSchedule() { // Checking to see if a game needs to be deleted. This is for removing inactive games so they don't stay in memory forever.
         ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
         ses.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+
+
+                if(games.get(games.size() -1 ).getStartTime().plusMinutes(1).isBefore(LocalDateTime.now())) { //Creating a bot game if the player have waited more than a minute in the lobby.
+                    games.get(games.size() - 1).setGameState(GameState.INGAME);
+                    games.get(games.size() - 1).setIsBotGame(true);
+                }
+
                 try {
                     for(int i = 0; i < games.size(); i ++) {
                         if(games.get(i) != null && games.get(i).checkIfGameHasExpired())

@@ -6,7 +6,7 @@ import io.javalin.http.staticfiles.Location;
 public class Application {
     public static void main(String[] args) {
 
-        Controller.startGameDeletionSchedule(); // Starting deletion schedule for inactive games.
+        Controller.startGameDeletionAndBotSchedule(); // Starting deletion schedule for inactive games.
 
         //Setting up webserver:
 

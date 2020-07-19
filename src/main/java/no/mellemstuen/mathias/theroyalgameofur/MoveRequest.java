@@ -15,4 +15,12 @@ public class MoveRequest {
     public String toString() {
         return "From: " + from + ". To: " + to;
     }
+
+
+    public MoveRequest() {};
+
+    public MoveRequest(int from, int to) {
+        this.from = from;
+        this.to = to;
+    }
 }

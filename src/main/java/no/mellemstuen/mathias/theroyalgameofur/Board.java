@@ -144,6 +144,17 @@ public class Board {
         return false;
     }
 
+
+    @JsonIgnore
+    public Piece[] getAllPiecesOfColor(Color color) {
+        ArrayList<Piece> p = new ArrayList<>();
+
+        for(int i = 0 ;i < pieces.size(); i++) {
+            if(pieces.get(i).getColor().equals(color))
+                p.add(pieces.get(i));
+        }
+        return (Piece[])p.toArray();
+    }
     @JsonIgnore
     private int pieceToArrayIndex(Piece piece) {
 

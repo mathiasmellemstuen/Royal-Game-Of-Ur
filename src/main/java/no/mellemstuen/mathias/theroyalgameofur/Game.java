@@ -14,6 +14,9 @@ public class Game {
     private final IdPair idPair;
 
     @JsonIgnore
+    private boolean isBotGame = false;
+
+    @JsonIgnore
     private LocalDateTime startTime;
 
     @JsonIgnore
@@ -35,11 +38,41 @@ public class Game {
     private Board board;
 
     @JsonProperty("specialcasemessage")
-    private String specialCaseMessage = "";
+    public String specialCaseMessage = "";
 
     @JsonIgnore
-    public Color  UIDToColor(String uid) throws NullPointerException{
+    public Color UIDToColor(String uid) throws NullPointerException{
         return uid.equals(idPair.getWhitePlayerId()) ? Color.WHITE : uid.equals(idPair.getBlackPlayerId())  ? Color.BLACK : null;
+    }
+
+    @JsonIgnore
+    public Color getPlayerTurn() {
+        return playerTurn;
+    }
+    @JsonIgnore
+    public int getDiceValue() {
+        return diceValue;
+    }
+    @JsonIgnore
+    public Board getBoard() {
+        return board;
+    }
+    @JsonIgnore
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+    @JsonIgnore
+    public boolean getIsBotGame() {
+        return isBotGame;
+    }
+
+    @JsonIgnore
+    public void setIsBotGame(boolean isBotGame) {
+        this.isBotGame = isBotGame;
+
+        if(playerTurn.equals(Color.BLACK)) {
+            Bot.calculateAndExecuteMove(this);
+        }
     }
 
     @JsonIgnore
@@ -59,7 +92,6 @@ public class Game {
 
     @JsonIgnore
     public void makeMove(Context context) {
-
 
         System.out.println("**********************");
         System.out.println("****** NEW MOVE ******");
@@ -133,14 +165,7 @@ public class Game {
             board.getPieceAtIndex(moveRequest.from).setIndex(moveRequest.to);
         }
 
-        if(board.checkForWinCondition(playerTurn)) {
-
-            System.out.println("Wincondition for " + playerTurn.toString());
-            gameState = playerTurn == Color.WHITE ? GameState.WHITE_VICTORY : GameState.BLACK_VICTORY;
-            context.json("\"VICTORY\"");
-            return;
-        }
-
+        checkForWinCondition();
 
         System.out.println("The move is valid. The piece have moved to the requested position.");
 
@@ -150,34 +175,55 @@ public class Game {
         rollDice();
         specialCaseMessage = "";
 
+        checkForDiceValueIsNull();
+        checkForPlayerNoMoves();
+
+        System.out.println("Move made successfully.");
+        context.json("\"VALID\"");
+
+
+        if(playerTurn.equals(Color.BLACK)) { // Making a bot move if everything is valid and it's the bots turn.
+            Bot.calculateAndExecuteMove(this);
+        }
+    }
+
+    public void checkForWinCondition() {
+        if(board.checkForWinCondition(playerTurn)) {
+
+            System.out.println("Wincondition for " + playerTurn.toString());
+            gameState = playerTurn == Color.WHITE ? GameState.WHITE_VICTORY : GameState.BLACK_VICTORY;
+            return;
+        }
+    }
+    public void checkForDiceValueIsNull() {
         //Edge case scenario where the dice roll is 0.
         while(diceValue == 0) {
             rollDice();
             specialCaseMessage += "Dice is 0 for " + playerTurn + ". Changing turn.;";
             changeTurn();
         }
+    }
 
+    public void checkForPlayerNoMoves() {
         //Edge case scenario where the player have no moves.
         while(!board.haveMoves(playerTurn,diceValue)) {
             rollDice();
             specialCaseMessage += "No moves for " + playerTurn + ". Changing turn.;";
             changeTurn();
         }
-
-        System.out.println("Move made successfully.");
-        context.json("\"VALID\"");
     }
 
+
+
     @JsonIgnore
-    private void rollDice() {
+    public void rollDice() {
         diceValue = Random.randomNumberInRange(0,4);
     }
 
     @JsonIgnore
-    private void changeTurn() {
+    public void changeTurn() {
         playerTurn = playerTurn == Color.WHITE ? Color.BLACK : Color.WHITE;
     }
-
     @JsonIgnore
     public String JSONResponse() {
         try {
@@ -210,7 +256,7 @@ public class Game {
     public boolean checkIfGameHasExpired() {
 
         boolean white = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now());
-        boolean black = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now());
+        boolean black = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now()) || isBotGame; // Makes this always true if it is a bot game.
         boolean start = startTime.plusHours(Controller.gameDeletionHours).isBefore(LocalDateTime.now());
 
         return (start || white || black);
