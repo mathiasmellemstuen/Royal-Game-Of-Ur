@@ -13,6 +13,7 @@ public class Application {
         Javalin app = Javalin.create();
         app.config.enableWebjars();
 
+        app.config.addStaticFiles("frontend", Location.EXTERNAL);
         //Setting up API calls:
 
         app.get("/api/newgame", Controller::newGame);

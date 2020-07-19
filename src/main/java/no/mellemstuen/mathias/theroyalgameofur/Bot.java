@@ -4,10 +4,9 @@ import java.util.ArrayList;
 
 public class Bot {
 
-    //The bot is always the black player.
-
     public static void calculateAndExecuteMove(Game game) {
 
+        System.out.println("Calculating bot move...");
         game.specialCaseMessage = "";
         game.rollDice();
 

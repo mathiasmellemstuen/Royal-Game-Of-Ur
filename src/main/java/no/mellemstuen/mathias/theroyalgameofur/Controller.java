@@ -120,8 +120,10 @@ public class Controller {
             @Override
             public void run() {
 
+                System.out.println("Starting game deletion and bot schedule.");
 
                 if(games.get(games.size() -1 ).getStartTime().plusMinutes(1).isBefore(LocalDateTime.now())) { //Creating a bot game if the player have waited more than a minute in the lobby.
+                    System.out.println("Starting bot game.");
                     games.get(games.size() - 1).setGameState(GameState.INGAME);
                     games.get(games.size() - 1).setIsBotGame(true);
                 }
