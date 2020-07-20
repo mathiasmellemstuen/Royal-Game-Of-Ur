@@ -63,6 +63,11 @@ public class Controller {
 
         games.add(game);
 
+        //Bot debugging.
+        System.out.println("Starting bot game.");
+        games.get(games.size() - 1).setGameState(GameState.INGAME);
+        games.get(games.size() - 1).setIsBotGame(true);
+
         context.json("{\"uid\":\"" + game.getIdPair().getWhitePlayerId() + "\"}");
     }
 
@@ -122,7 +127,7 @@ public class Controller {
 
                 System.out.println("Starting game deletion and bot schedule.");
 
-                if(games.get(games.size() -1 ).getStartTime().plusMinutes(1).isBefore(LocalDateTime.now())) { //Creating a bot game if the player have waited more than a minute in the lobby.
+                if(games.size() != 0 && games.get(games.size() -1 ).getGameState().equals(GameState.LOBBY) && games.get(games.size() -1 ).getStartTime().plusMinutes(1).isBefore(LocalDateTime.now())) { //Creating a bot game if the player have waited more than a minute in the lobby.
                     System.out.println("Starting bot game.");
                     games.get(games.size() - 1).setGameState(GameState.INGAME);
                     games.get(games.size() - 1).setIsBotGame(true);

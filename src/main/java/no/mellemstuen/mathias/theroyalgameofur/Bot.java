@@ -17,17 +17,30 @@ public class Bot {
             return;
 
         //The bot has a move value that is not 0 and it's the bot's turn.
-
+        System.out.println("It's the bots turn.");
 
         //Calculating all the moves the bot can take.
         Piece[] pieces = game.getBoard().getAllPiecesOfColor(Color.BLACK);
         ArrayList<MoveRequest> validMoveRequests = new ArrayList<>();
 
         for(Piece piece: pieces) {
-            if (game.getBoard().checkIfMoveIsValid(piece, piece.getIndex() >= 24 ? game.getDiceValue() : piece.getIndex() + game.getDiceValue(), game.getDiceValue(), false))
-                validMoveRequests.add(new MoveRequest(piece.getIndex(), piece.getIndex() >= 24 ? game.getDiceValue() : piece.getIndex() + game.getDiceValue()));
-        }
 
+            if(Board.pieceToArrayIndex(piece) + game.getDiceValue() > Board.blackPath.length - 1)
+                continue;
+
+            boolean valid = game.getBoard().checkIfMoveIsValid(piece, piece.getIndex() >= 24 ? Board.blackPath[game.getDiceValue() - 1] : Board.blackPath[Board.pieceToArrayIndex(piece) + game.getDiceValue()], game.getDiceValue(), true);
+            if (valid)
+                validMoveRequests.add(new MoveRequest(piece.getIndex(), piece.getIndex() >= 24 ? Board.blackPath[game.getDiceValue() - 1] : Board.blackPath[Board.pieceToArrayIndex(piece) + game.getDiceValue()]));
+        }
+        System.out.print("This is all the valid moves:");
+        System.out.println(validMoveRequests);
+
+
+        if(validMoveRequests.size() == 0) {
+
+            System.out.println("This is happening, something is wrong?");
+            return;
+        }
         //Valid move requests contains all the ways the bot can move.
 
         if(validMoveRequests.size() == 1) {
@@ -64,10 +77,11 @@ public class Bot {
         } else if (game.getBoard().getPieceAtIndex(move.to) != null) { // Capturing a piece.
 
             game.getBoard().placePieceOffBoard(game.getBoard().getPieceAtIndex(move.to));
-            game.getBoard().pieces.get(move.from).setIndex(move.to);
+            game.getBoard().getPieceAtIndex(move.from).setIndex(move.to);
+
         }
         else { // Move the piece.
-            game.getBoard().pieces.get(move.from).setIndex(move.to);
+            game.getBoard().getPieceAtIndex(move.from).setIndex(move.to);
         }
 
         game.checkForWinCondition();

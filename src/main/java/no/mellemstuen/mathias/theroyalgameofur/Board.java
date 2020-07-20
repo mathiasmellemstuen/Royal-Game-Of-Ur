@@ -153,10 +153,10 @@ public class Board {
             if(pieces.get(i).getColor().equals(color))
                 p.add(pieces.get(i));
         }
-        return (Piece[])p.toArray();
+        return p.toArray(new Piece[0]);
     }
     @JsonIgnore
-    private int pieceToArrayIndex(Piece piece) {
+    public static int pieceToArrayIndex(Piece piece) {
 
         int[] arr = piece.getColor() == Color.WHITE ? whitePath : blackPath;
         int pos = piece.getIndex();

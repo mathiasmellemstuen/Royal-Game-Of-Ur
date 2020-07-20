@@ -20,4 +20,9 @@ public class Piece {
         this.index = index;
         this.color = color;
     }
+
+    @Override
+    public String toString() {
+        return "Piece ( " + color.toString() + ", " + index + ")";
+    }
 }
