@@ -492,52 +492,56 @@ function drawStone(index, img) {
     if(index >= tileMap.length) {
         switch(index) {
             case 24:
-                context.drawImage(img, 0, 0 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 0, 0);
             break; 
             case 25:
-                context.drawImage(img, 0, 1 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 0, 1 * getTileSize());
             break; 
             case 26: 
-            context.drawImage(img, 0, 2 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 0, 2 * getTileSize());
             break;
             case 27: 
-            context.drawImage(img, 0, 3 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 0, 3 * getTileSize());
             break; 
             case 28:
-                context.drawImage(img, 0, 4 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 0, 4 * getTileSize());
             break;
             case 29: 
-                context.drawImage(img, 0, 5 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 0, 5 * getTileSize());
             break; 
             case 30: 
-                context.drawImage(img, 0, 6 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 0, 6 * getTileSize());
             break;
             case 31:
-                context.drawImage(img, 4 * getTileSize(), 0 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 4 * getTileSize(), 0 * getTileSize());
             break; 
             case 32:
-                context.drawImage(img, 4 * getTileSize(), 1 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 4 * getTileSize(), 1 * getTileSize());
             break; 
             case 33: 
-                context.drawImage(img, 4 * getTileSize(), 2 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 4 * getTileSize(), 2 * getTileSize());
             break; 
-            case 34: 
-                context.drawImage(img, 4 * getTileSize(), 3 * getTileSize(), getTileSize(), getTileSize());
+            case 34:
+                drawCircle(img, 4 * getTileSize(), 3 * getTileSize());
             break; 
             case 35: 
-                context.drawImage(img, 4 * getTileSize(), 4 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 4 * getTileSize(), 4 * getTileSize());
             break; 
             case 36: 
-                context.drawImage(img, 4 * getTileSize(), 5 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 4 * getTileSize(), 5 * getTileSize());
             break; 
             case 37: 
-                context.drawImage(img, 4 * getTileSize(), 6 * getTileSize(), getTileSize(), getTileSize());
+                drawCircle(img, 4 * getTileSize(), 6 * getTileSize());
             break;
         }
         return; 
     }
     let pos = tileMapIndexToPosition(index); 
-    context.drawImage(img, (pos.x * getTileSize()) + getTileSize(), pos.y * getTileSize(), getTileSize(), getTileSize());
+    drawCircle(img, (pos.x * getTileSize()) + getTileSize(), pos.y * getTileSize());
+}
+
+function drawCircle(img, x,y) {
+    context.drawImage(img, x, y, getTileSize(), getTileSize());
 }
 
 function startNewGame() {
