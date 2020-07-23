@@ -1,7 +1,7 @@
 package no.mellemstuen.mathias.theroyalgameofur;
 
 public class Random {
-    private static java.util.Random rd = new java.util.Random();
+    private static final java.util.Random rd = new java.util.Random();
 
     public static boolean getRandom() {
         return rd.nextBoolean();
