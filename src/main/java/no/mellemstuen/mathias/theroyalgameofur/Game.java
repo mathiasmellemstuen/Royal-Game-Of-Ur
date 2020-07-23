@@ -213,8 +213,6 @@ public class Game {
         }
     }
 
-
-
     @JsonIgnore
     public void rollDice() {
         diceValue = Random.randomNumberInRange(0,4);

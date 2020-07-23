@@ -277,7 +277,12 @@ p,span,h1,h2,h3,h4,label,li {
     margin-right: auto;
     display:block;
 }
-
+#copyright {
+    position: fixed;
+    bottom:0; 
+    right:0px;
+    color:white;    
+}
 .text-under-image {
     display: flex;
     flex-direction: column;

@@ -4,9 +4,17 @@ import java.util.ArrayList;
 
 public class Bot {
 
+    public static final int botDelayTime = 500; // Milliseconds.
+
+    private static void botSleep() {
+        try {
+            Thread.sleep(botDelayTime);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public static void calculateAndExecuteMove(Game game) {
 
-        System.out.println("Calculating bot move...");
         game.specialCaseMessage = "";
         game.rollDice();
 
@@ -17,9 +25,8 @@ public class Bot {
             return;
 
         //The bot has a move value that is not 0 and it's the bot's turn.
-        System.out.println("It's the bots turn.");
-
         //Calculating all the moves the bot can take.
+
         Piece[] pieces = game.getBoard().getAllPiecesOfColor(Color.BLACK);
         ArrayList<MoveRequest> validMoveRequests = new ArrayList<>();
 
@@ -32,18 +39,16 @@ public class Bot {
             if (valid)
                 validMoveRequests.add(new MoveRequest(piece.getIndex(), piece.getIndex() >= 24 ? Board.blackPath[game.getDiceValue() - 1] : Board.blackPath[Board.pieceToArrayIndex(piece) + game.getDiceValue()]));
         }
-        System.out.print("This is all the valid moves:");
-        System.out.println(validMoveRequests);
-
 
         if(validMoveRequests.size() == 0) {
 
-            System.out.println("This is happening, something is wrong?");
+            System.out.println("Something is wrong?");
             return;
         }
         //Valid move requests contains all the ways the bot can move.
 
         if(validMoveRequests.size() == 1) {
+            System.out.println("It's only one available move. Executing the following move.");
             makeMove(game, validMoveRequests.get(0));
             return;
         }
@@ -51,6 +56,7 @@ public class Bot {
         //Checking if any of the moves is landing on a rosette or if it can move out of the board.
 
         for(MoveRequest move : validMoveRequests) {
+
             if (game.getBoard().pieceGetsBonusMove(move.to)) { // 1. Check if the bot can land on a rosette.
                 makeMove(game, move);
                 return;
@@ -70,6 +76,8 @@ public class Bot {
     }
 
     public static void makeMove(Game game, MoveRequest move) {
+
+        botSleep();
 
         if(move.to == 17) { // Removing the piece if the bot is moving a piece out of the board.
             game.getBoard().removePieceAtIndex(move.from);
@@ -93,6 +101,8 @@ public class Bot {
             calculateAndExecuteMove(game);
         } else {
             game.changeTurn();
+            game.checkForDiceValueIsNull();
+            game.checkForPlayerNoMoves();
         }
     }
 }

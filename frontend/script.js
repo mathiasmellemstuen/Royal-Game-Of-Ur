@@ -135,6 +135,8 @@ image_black_stone.src="/graphics/Black_Stone.png";
 
 window.onload = function() {
 
+    document.getElementById("copyright").innerHTML = "&copy; Copyright " + new Date().getFullYear().toString() + ", Mathias Mellemstuen"
+
     dicePanel = document.getElementById("dice-panel");
     dicePanel_CurrentPlayer = document.getElementById("dice-panel-current-player");
     dicePanel_CurrentPlayerButton = document.getElementById("dice-panel-current-player-button");

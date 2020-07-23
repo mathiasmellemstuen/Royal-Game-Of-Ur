@@ -51,15 +51,18 @@ public class Board {
     @JsonIgnore
     public void placePieceOffBoard(Piece piece) {
 
-        for(int i = piece.getColor() == Color.WHITE ? 24 : 31; i < 7; i++) {
+        int startIndex = piece.getColor().equals(Color.WHITE) ? 24 : 31;
+        int endingIndex = startIndex + 5;
+
+        for(int i = startIndex; i < endingIndex; i++) {
 
             boolean foundPieceWithIndex = false;
 
-            for(int j = 0; j < pieces.size(); i++)
+            for(int j = 0; j < pieces.size(); j++)
                 if(pieces.get(j).getIndex() == i)
                     foundPieceWithIndex = true;
 
-            if(foundPieceWithIndex == false) {
+            if(!foundPieceWithIndex) {
                 piece.setIndex(i);
                 return;
             }
@@ -183,7 +186,7 @@ public class Board {
 
         for(Piece p: pieces) {
 
-            if(p.getColor() != playerColor)
+            if(!p.getColor().equals(playerColor))
                 continue;
 
             if(pieceToArrayIndex(p) + moveCount >= path.length)
