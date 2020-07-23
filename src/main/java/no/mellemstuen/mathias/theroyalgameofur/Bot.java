@@ -15,6 +15,7 @@ public class Bot {
     }
     public static void calculateAndExecuteMove(Game game) {
 
+        System.out.println("Calculating and executing bot move.");
         game.specialCaseMessage = "";
         game.rollDice();
 
@@ -103,6 +104,10 @@ public class Bot {
             game.changeTurn();
             game.checkForDiceValueIsNull();
             game.checkForPlayerNoMoves();
+
+            if(game.getPlayerTurn().equals(Color.BLACK)) { // Making a bot move if everything is valid and it's the bots turn.
+                Bot.calculateAndExecuteMove(game);
+            }
         }
     }
 }

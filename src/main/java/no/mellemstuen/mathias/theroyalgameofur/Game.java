@@ -211,6 +211,7 @@ public class Game {
             specialCaseMessage += "No moves for " + playerTurn + ". Changing turn.;";
             changeTurn();
         }
+
     }
 
     @JsonIgnore
@@ -254,7 +255,7 @@ public class Game {
     public boolean checkIfGameHasExpired() {
 
         boolean white = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now());
-        boolean black = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now()) && !isBotGame; // Makes this always true if it is a bot game.
+        boolean black = lastRequestFromWhite.plusMinutes(Controller.gameDeletionScheduleMinutes).isBefore(LocalDateTime.now()) && !isBotGame; // Makes this always false if it is a bot game.
         boolean start = startTime.plusHours(Controller.gameDeletionHours).isBefore(LocalDateTime.now());
 
         return (start || white || black);
