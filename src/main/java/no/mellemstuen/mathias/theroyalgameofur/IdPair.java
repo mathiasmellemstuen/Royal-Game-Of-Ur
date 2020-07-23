@@ -7,8 +7,6 @@ public class IdPair {
     private final String whitePlayerId = UUID.randomUUID().toString();
     private final String blackPlayerId = UUID.randomUUID().toString();
 
-    private boolean whiteTurn = Random.getRandom();
-
     public String getWhitePlayerId() {
         return whitePlayerId;
     }
