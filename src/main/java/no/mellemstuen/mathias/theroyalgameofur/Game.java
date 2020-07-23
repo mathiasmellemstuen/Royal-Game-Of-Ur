@@ -93,21 +93,10 @@ public class Game {
     @JsonIgnore
     public void makeMove(Context context) {
 
-        System.out.println("**********************");
-        System.out.println("****** NEW MOVE ******");
-        System.out.println("**********************");
-
         if(gameState != GameState.INGAME)
             return;
 
         String uid = Controller.getUID(context);
-
-        System.out.println("The move makers UID: " + uid);
-
-        System.out.println("The UIDS of the players in this game: ");
-        System.out.println("Black player UID: " + idPair.getBlackPlayerId());
-        System.out.println("White player UID: " + idPair.getWhitePlayerId());
-        System.out.println("\n");
 
         if(uid.equals(idPair.getBlackPlayerId())) {
             lastRequestFromBlack = LocalDateTime.now();
@@ -122,8 +111,6 @@ public class Game {
             context.json("\"NOT YOUR TURN OR WRONG UID\"");
             return;
         }
-        System.out.println("The move maker is authenticated. Moving on. ");
-
         //Authenticated and your turn here.
 
         String requestContent = context.body().toString();
@@ -136,22 +123,19 @@ public class Game {
             e.printStackTrace();
         }
 
-        System.out.println("Moverequest: " + moveRequest);
-
         if(moveRequest == null) {
             System.out.println("Could not process delivered JSON data. Returning!");
             context.json("\"COULD NOT PROCESS JSON\"");
             return;
         }
 
-        if(!board.checkIfMoveIsValid(board.getPieceAtIndex(moveRequest.from),moveRequest.to,diceValue, true)) {
+        if(!board.checkIfMoveIsValid(board.getPieceAtIndex(moveRequest.from),moveRequest.to,diceValue)) {
             System.out.println("Invalid move! Returning!");
             context.json("\"INVALID MOVE\"");
             return;
         }
 
         if(moveRequest.to == 17 || moveRequest.to == 15) {
-            System.out.println("Removing piece.");
             board.removePieceAtIndex(moveRequest.from);
         }
         else if(board.getPieceAtIndex(moveRequest.to) != null && board.getPieceAtIndex(moveRequest.to).getColor() != playerTurn) {
@@ -167,8 +151,6 @@ public class Game {
 
         checkForWinCondition();
 
-        System.out.println("The move is valid. The piece have moved to the requested position.");
-
         if(!board.pieceGetsBonusMove(moveRequest.to)) //Changing turn if the piece does not get a bonus move.
             changeTurn();
 
@@ -178,7 +160,6 @@ public class Game {
         checkForDiceValueIsNull();
         checkForPlayerNoMoves();
 
-        System.out.println("Move made successfully.");
         context.json("\"VALID\"");
 
 
@@ -190,9 +171,7 @@ public class Game {
     public void checkForWinCondition() {
         if(board.checkForWinCondition(playerTurn)) {
 
-            System.out.println("Wincondition for " + playerTurn.toString());
             gameState = playerTurn == Color.WHITE ? GameState.WHITE_VICTORY : GameState.BLACK_VICTORY;
-            return;
         }
     }
     public void checkForDiceValueIsNull() {
@@ -242,12 +221,10 @@ public class Game {
     public void resign(String uid) {
 
         if(uid.equals(idPair.getBlackPlayerId())) {
-            System.out.println("The black player resigned. White player wins!");
             this.gameState = GameState.WHITE_VICTORY;
         }
 
         if(uid.equals(idPair.getWhitePlayerId())) {
-            System.out.println("The white player resigned. Black player wins!");
             this.gameState = GameState.BLACK_VICTORY;
         }
     }

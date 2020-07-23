@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class Controller {
     public static final int gameDeletionHours = 1; //Aborting every game every hour even if it is not finished.
     public static final int gameDeletionScheduleMinutes = 1; //Aborting a game with this amount of minutes of inactivity.
+    public static final int timeBeforeBotGameStarts = 30; //Seconds.
     private static ArrayList<Game> games = new ArrayList<>();
 
     public static String getUID(Context context) {
@@ -33,7 +34,6 @@ public class Controller {
         String uid = getUID(context);
 
         if(uid == null) {
-            System.out.println("Could not find uid or game.");
             context.json("aborted");
             return;
         }
@@ -41,7 +41,6 @@ public class Controller {
         Game game = getGame(uid);
 
         if(game == null) {
-            System.out.println("Could not find game.");
             context.json("aborted");
             return;
         }
@@ -54,7 +53,6 @@ public class Controller {
         if(games.size() != 0 && games.get(games.size() - 1).getGameState() == GameState.LOBBY) {
 
             context.json("{\"uid\":\"" + games.get(games.size() - 1).getIdPair().getBlackPlayerId() + "\"}");
-            System.out.println("Starting a new game.");
             games.get(games.size() - 1).setGameState(GameState.INGAME);
             return;
         }
@@ -62,11 +60,6 @@ public class Controller {
         Game game = new Game(new IdPair());
 
         games.add(game);
-
-        //Bot debugging.
-        System.out.println("Starting bot game.");
-        games.get(games.size() - 1).setGameState(GameState.INGAME);
-        games.get(games.size() - 1).setIsBotGame(true);
 
         context.json("{\"uid\":\"" + game.getIdPair().getWhitePlayerId() + "\"}");
     }
@@ -125,14 +118,11 @@ public class Controller {
             @Override
             public void run() {
 
-                System.out.println("Starting game deletion and bot schedule.");
 
-                if(games.size() != 0 && games.get(games.size() -1 ).getGameState().equals(GameState.LOBBY) && games.get(games.size() -1 ).getStartTime().plusMinutes(1).isBefore(LocalDateTime.now())) { //Creating a bot game if the player have waited more than a minute in the lobby.
-                    System.out.println("Starting bot game.");
+                if(games.size() != 0 && games.get(games.size() -1 ).getGameState().equals(GameState.LOBBY) && games.get(games.size() -1 ).getStartTime().plusSeconds(timeBeforeBotGameStarts).isBefore(LocalDateTime.now())) { //Creating a bot game if the player have waited more than a minute in the lobby.
                     games.get(games.size() - 1).setGameState(GameState.INGAME);
                     games.get(games.size() - 1).setIsBotGame(true);
                 }
-
                 try {
                     for(int i = 0; i < games.size(); i ++) {
                         if(games.get(i) != null && games.get(i).checkIfGameHasExpired())

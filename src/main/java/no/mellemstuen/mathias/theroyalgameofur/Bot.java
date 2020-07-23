@@ -15,7 +15,6 @@ public class Bot {
     }
     public static void calculateAndExecuteMove(Game game) {
 
-        System.out.println("Calculating and executing bot move.");
         game.specialCaseMessage = "";
         game.rollDice();
 
@@ -36,20 +35,17 @@ public class Bot {
             if(Board.pieceToArrayIndex(piece) + game.getDiceValue() > Board.blackPath.length - 1)
                 continue;
 
-            boolean valid = game.getBoard().checkIfMoveIsValid(piece, piece.getIndex() >= 24 ? Board.blackPath[game.getDiceValue() - 1] : Board.blackPath[Board.pieceToArrayIndex(piece) + game.getDiceValue()], game.getDiceValue(), true);
+            boolean valid = game.getBoard().checkIfMoveIsValid(piece, piece.getIndex() >= 24 ? Board.blackPath[game.getDiceValue() - 1] : Board.blackPath[Board.pieceToArrayIndex(piece) + game.getDiceValue()], game.getDiceValue());
             if (valid)
                 validMoveRequests.add(new MoveRequest(piece.getIndex(), piece.getIndex() >= 24 ? Board.blackPath[game.getDiceValue() - 1] : Board.blackPath[Board.pieceToArrayIndex(piece) + game.getDiceValue()]));
         }
 
-        if(validMoveRequests.size() == 0) {
-
-            System.out.println("Something is wrong?");
+        if(validMoveRequests.size() == 0)
             return;
-        }
+
         //Valid move requests contains all the ways the bot can move.
 
         if(validMoveRequests.size() == 1) {
-            System.out.println("It's only one available move. Executing the following move.");
             makeMove(game, validMoveRequests.get(0));
             return;
         }

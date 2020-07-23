@@ -14,7 +14,6 @@ const openGameTypeScreenDelay = 3000;
 const maxDiceValue = 4;
 const onlineGameUpdateIntervalMs = 1000;
 const waitingForPlayerIntervalMs = 1000;
-
 const tileMap = [
      6,5,6,
      3,2,3,
@@ -25,7 +24,6 @@ const tileMap = [
      6,3,6,
      1,2,1
 ];
-
 const whitePlayerPath = [
     9,
     6,
@@ -73,45 +71,37 @@ var pieces = [
     {color:"black", index:35}
 ];
 var pieceOnHand = { from:undefined, state:false }
-var currentAvaiablePlacementForPiece = undefined;
 var canvas; 
 var context; 
-var playerColor = undefined;
-var onlinePlayerTurn = undefined;
 var drawingInterval; 
 var mousePosition = { x:0, y:0 }
+var drawingIntervalTime = 16.6666667; // approx. 20 ms per frame. 
+var openStartPage = true; 
+var gameFinished = true;
+var currentAvaiablePlacementForPiece = undefined;
+var onlinePlayerTurn = undefined;
+var playerColor = undefined;
 var uid = undefined; //User-identification for online games.
 var gameMode = undefined; //Online or offline
 var diceValue = undefined;
-var drawingIntervalTime = 16.6666667; // approx. 20 ms per frame. 
-
-var openStartPage = true; 
-
 var onlineGameUpdateInterval = undefined;
 var waitingForPlayerInterval = undefined;
-
-var gameFinished = true;
 var lastShownedMessage = "";
-
 var dicePanel = undefined;
 var dicePanel_CurrentPlayer = undefined;
 var dicePanel_CurrentPlayerButton = undefined;
 var dicePanel_DiceValue = undefined;
 var dicePanel_RollDiceButton = undefined;
-
 var messageModal = undefined; 
 var messageModalHeader = undefined; 
 var messageModalText = undefined; 
 var messageModalOkButton = undefined; 
-
 var settingsIcon = undefined; 
 var newGameIcon = undefined; 
 var resignIcon = undefined; 
 var questionMarkIcon = undefined; 
-
 var specialCaseContainer = undefined; 
 var lastSpecialCaseMessage = ""; 
-
 var image_nf1 = new Image(); 
 var image_nf2 = new Image(); 
 var image_nf3 = new Image(); 
@@ -581,7 +571,6 @@ function startNewGame() {
 
             uid = JSON.parse(response).uid;
 
-            //Getting player color.
             fetch("/api/color?uid=" + uid).then(color => color.json()).then((color) => {
 
                 playerColor = color.toLowerCase();
@@ -614,46 +603,57 @@ function startNewGame() {
     }
 }
 
+function gameUpdateInGame(gameUpdate) {
+    initDicePanelOnline();
+    disableWaitingForPlayer();
+    setupPiecesFromOnlineGameUpdate(gameUpdate);
+    onlinePlayerTurn = gameUpdate.playerturn.toLowerCase();
+    diceValue = gameUpdate.dicevalue;
+    changeDicePanelDiceValueText();
+    changeDicePanelCurrentPlayerText(); 
+
+    if(lastSpecialCaseMessage != gameUpdate.specialcasemessage)
+        displaySpecialCaseMessages(gameUpdate.specialcasemessage); 
+
+    lastSpecialCaseMessage = gameUpdate.specialcasemessage; 
+}
+
+function gameUpdateWhiteVictory() {
+    console.log("White victory");
+    openMessageModal(playerColor == "white" ? "Victory!" : "Defeat!", playerColor == "white" ? "You won!" : "The white player won!"); 
+    clearInterval(onlineGameUpdateInterval); 
+    onlineGameUpdateInterval = undefined; 
+    clearInterval(drawingInterval); 
+    drawingInterval = undefined; 
+    disableDicePanel();
+    disableConfirmationLeaving(); 
+    gameFinished = true; 
+}
+
+function gameUpdateBlackVictory() {
+    console.log("Black victory");
+    openMessageModal(playerColor == "black" ? "Victory!" : "Defeat!", playerColor == "black" ? "You won!" : "The white player won!"); 
+    clearInterval(onlineGameUpdateInterval); 
+    onlineGameUpdateInterval = undefined; 
+    clearInterval(drawingInterval); 
+    drawingInterval = undefined; 
+    disableDicePanel();
+    disableConfirmationLeaving(); 
+    gameFinished = true; 
+}
 function handleOnlineGameUpdate(gameUpdate) {
 
     switch (gameUpdate.gamestate) {
         case "LOBBY":
             break;
         case "INGAME":
-            initDicePanelOnline();
-            disableWaitingForPlayer();
-            setupPiecesFromOnlineGameUpdate(gameUpdate);
-            onlinePlayerTurn = gameUpdate.playerturn.toLowerCase();
-            diceValue = gameUpdate.dicevalue;
-            changeDicePanelDiceValueText();
-            changeDicePanelCurrentPlayerText(); 
-
-            if(lastSpecialCaseMessage != gameUpdate.specialcasemessage)
-                displaySpecialCaseMessages(gameUpdate.specialcasemessage); 
-            lastSpecialCaseMessage = gameUpdate.specialcasemessage; 
-
+                gameUpdateInGame(gameUpdate); 
             break;
         case "WHITE_VICTORY":
-            console.log("White victory");
-            openMessageModal(playerColor == "white" ? "Victory!" : "Defeat!", playerColor == "white" ? "You won!" : "The white player won!"); 
-            clearInterval(onlineGameUpdateInterval); 
-            onlineGameUpdateInterval = undefined; 
-            clearInterval(drawingInterval); 
-            drawingInterval = undefined; 
-            disableDicePanel();
-            disableConfirmationLeaving(); 
-            gameFinished = true; 
+                gameUpdateWhiteVictory(); 
             break;
         case "BLACK_VICTORY":
-            console.log("Black victory");
-            openMessageModal(playerColor == "black" ? "Victory!" : "Defeat!", playerColor == "black" ? "You won!" : "The white player won!"); 
-            clearInterval(onlineGameUpdateInterval); 
-            onlineGameUpdateInterval = undefined; 
-            clearInterval(drawingInterval); 
-            drawingInterval = undefined; 
-            disableDicePanel();
-            disableConfirmationLeaving(); 
-            gameFinished = true; 
+                gameUpdateBlackVictory(); 
             break;
     }
 }
@@ -661,12 +661,12 @@ function handleOnlineGameUpdate(gameUpdate) {
 function setupPiecesFromOnlineGameUpdate(gameUpdate) {
 
     if(pieceOnHand.piece != undefined)  {
-        console.log("Hitting this."); 
         return; 
     }
         
     pieces = [];
     let newPieces = gameUpdate.board.pieces;
+
     for(let i = 0; i < newPieces.length; i++) {
         let newPiece = newPieces[i];
         newPiece.color = newPiece.color.toLowerCase();
@@ -689,14 +689,17 @@ function offlineChangeTurn()  {
 }
 
 function updateRawMousePosition(event) {
+
     let rect = canvas.getBoundingClientRect();
     mousePosition.x = event.clientX - rect.left;
     mousePosition.y = event.clientY - rect.top;
 }
 function onMouseMove(event) {
+
     updateRawMousePosition(event);
 }
 function getCanvasXSize() {
+
     return window.innerWidth / 3.5; 
 }
 
@@ -818,6 +821,11 @@ function placePieceOffBoard(piece) {
     console.error("Could not find available space.");
 }
 
+function putDownPieceWinConditionFunctionality() {
+    gameFinished = true;
+    openGameTypeScreenDelayed();
+    disableConfirmationLeaving(); 
+}
 function putDownPiece(index) {
 
     function clearPieceOnHand() {
@@ -832,16 +840,12 @@ function putDownPiece(index) {
 
             if(checkForWinCondition("white")) {
                 console.log("White player won!"); 
-                gameFinished = true;
-                openGameTypeScreenDelayed();
-                disableConfirmationLeaving(); 
+                putDownPieceWinConditionFunctionality(); 
             }
 
             if(checkForWinCondition("black")) {
                 console.log("Black player won!"); 
-                gameFinished = true;
-                openGameTypeScreenDelayed();
-                disableConfirmationLeaving(); 
+                putDownPieceWinConditionFunctionality(); 
             }
             sendMove(pieceOnHand.piece.index, index);
             clearPieceOnHand();

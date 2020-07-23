@@ -79,18 +79,9 @@ public class Board {
     }
 
     @JsonIgnore
-    public boolean checkIfMoveIsValid(Piece piece, int to, int moveCount, boolean verbose) {
-
-        if(verbose) {
-            System.out.println("*******************************");
-            System.out.println("** CHECKING IF MOVE IS VALID **");
-            System.out.println("*******************************");
-            System.out.println("Entering with to: " + to + " and moveCount: " + moveCount + ". The piece position is: " + piece.getIndex() + ".");
-        }
+    public boolean checkIfMoveIsValid(Piece piece, int to, int moveCount) {
 
         if(piece == null) {
-
-            if(verbose) System.out.println("The piece is null.");
 
             return false;
         }
@@ -103,11 +94,7 @@ public class Board {
 
             index = path[moveCount - 1];
 
-            if(verbose) System.out.println("1. The path value index is: " + index);
-
             if(to != index) {
-
-                if(verbose) System.out.println("To != index. Returing false.");
 
                 return false;
             }
@@ -117,23 +104,16 @@ public class Board {
 
         } else {
 
-            if(verbose) System.out.println("2. The index of the piece is: " + piece.getIndex());
-
             int pieceArrayIndex = pieceToArrayIndex(piece);
 
-            System.out.println("The piece array index is: " + pieceArrayIndex);
 
             if(pieceArrayIndex == -1) {
-                if(verbose) System.out.println("2. The index is out of bounds.");
                 return false;
             }
 
             index = path[pieceArrayIndex + moveCount];
 
-            if(verbose) System.out.println("2. The path value index is: " + index);
-
             if(to != index) {
-                if(verbose) System.out.println("To != index. Returing false.");
 
                 return false;
             }
@@ -142,8 +122,6 @@ public class Board {
                 return true;
 
         }
-        if(verbose) System.out.println("Not meeting any of the conditions over. Returning false.");
-
         return false;
     }
 
@@ -194,7 +172,7 @@ public class Board {
 
             int index = p.getIndex() >= 24 ? path[moveCount - 1] : path[pieceToArrayIndex(p) + moveCount];
 
-            if(checkIfMoveIsValid(p,index,moveCount, false))
+            if(checkIfMoveIsValid(p,index,moveCount))
                 return true;
         }
         return false;
